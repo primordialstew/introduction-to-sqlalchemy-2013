@@ -1,0 +1,10 @@
+doc/build
+*.pyc
+*.swp
+*.orig
+build
+tmp
+dist
+.venv
+.coverage
+.DS_Store
