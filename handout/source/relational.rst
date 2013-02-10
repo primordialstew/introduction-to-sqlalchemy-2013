@@ -34,8 +34,10 @@ Overview
 
 * RDBMSs provide guarantees for data using the :term:`ACID` model.
 
-Schema Concepts
-===============
+.. _ddl:
+
+Data Definition Language (DDL)
+==============================
 
 Table
 -----
@@ -62,6 +64,8 @@ statement.  The ``CREATE TABLE`` statement is an example of Data Definition Lang
          emp_name VARCHAR(30),
          dep_id INTEGER
     )
+
+.. _primary_key:
 
 Primary Keys
 ------------
@@ -95,6 +99,8 @@ on a new column ``emp_id``:
          PRIMARY KEY (emp_id)
     )
 
+
+.. _foreign_key:
 
 Foreign Keys
 ------------
@@ -148,6 +154,8 @@ The above schema can be created using DDL as follows:
            REFERENCES department(dep_id)
     )
 
+.. _dml:
+
 Data Manipulation Language (DML)
 ================================
 
@@ -194,14 +202,17 @@ a ``WHERE`` clause to identify those rows which should be deleted:
 
     DELETE FROM employee WHERE dep_id=1
 
-Selects
+.. _queries:
+
+Queries
 =======
 
-The ``SELECT`` statement is the primary feature of the so-called :term:`data query language`,
-or DQL, subset of SQL.   The ``SELECT`` is where we spend most of our time when
-using relational databases, and allows us to query for rows in a table.
+The key feature of SQL is its ability to issue queries.   The ``SELECT``
+statement is the primary language construct providing this feature,
+and is where we spend most of our time when
+using relational databases, allowing us to query for rows in tables.
 
-A simple illustration of a ``SELECT`` statement is in the figure below.  Like
+An illustration of a ``SELECT`` statement is in the figure below.  Like
 the ``UPDATE`` and ``DELETE`` statements, it also features a ``WHERE`` clause which is the
 primary means of specifying which rows should be selected.
 
@@ -541,15 +552,17 @@ We'll analyze what a ``SELECT`` statement like the following does in a logical s
         ------------+-----------
              3      |    1
 
+.. _acid_model:
 
 ACID Model
 ==========
 
 The flip side to the relational model employed by relational databases is the
-so called transactional model most of them provide.   The term :term:`ACID` is an
+so called :term:`transactional` model most of them provide.   The term :term:`ACID` is an
 acronym that refers to the principal properties of relational database transactions
 (as well as transactions for any kind of hypothetical database).
 
+.. _atomicity:
 
 Atomicity
 ---------
@@ -558,16 +571,24 @@ Atomicity
 as a :term:`transaction`, which has a single point of completion known as a :term:`commit`.
 A transation is committed once all the operations within it have completed successfully.
 If any of the operations fail, the transaction can instead be reverted using a :term:`rollback`,
-which reverses all the steps that have proceeded within the transaction.  Atomicity refers
+which reverses all the steps that have proceeded within the transaction, leaving the state
+of the database unchanged relative to before the transaction began.  Atomicity refers
 to the fact that all of these steps proceed or fail as a single unit; it's not possible for
 some of the steps to succeed without all of them succeeding.
+
+.. _consistency:
 
 Consistency
 -----------
 
-:term:`Consistency` generally refers to the concept of :term:`constraints`, which are typically
-schema-level constructs that establish rules for what kind of data can be placed
-into a table.   Typical constraints include:
+:term:`Consistency` encompasses the ability of the database to ensure that the
+database always remain in a valid state after a transaction completes successfully.
+Key elements used to provide consistency are :term:`constraints`, :term:`cascades`,
+and :term:`triggers`.
+
+Data constraints are the most common system used to define consistency, which
+establish rules that are checked against changes in data as those data changes
+are invoked against the database. Typical constraints include:
 
     * NOT NULL constraint - value in a column may never be NULL, or non-present.
 
@@ -599,6 +620,8 @@ more quickly and boldly than we would be able to otherwise; more quickly because
 the relational database already does lots of the integrity checking we'd otherwise
 have to write by hand, and more boldly because we can produce test code more
 quickly without as much risk of corrupting our data as if we hadn't used constraints.
+
+.. _isolation:
 
 Isolation
 ----------
@@ -665,6 +688,8 @@ concurrency control` in order to greatly reduce the need for locking, by assigni
 to each transaction a unique identifier that is then applied to *copies* of rows
 created locally to each transaction.  As a transaction commits its data, it's private copies
 of rows become the official "rows of record" for the database as a whole.
+
+.. _durability:
 
 Durability
 ----------
