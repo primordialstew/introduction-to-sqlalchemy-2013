@@ -18,8 +18,8 @@ with the concepts outlined in this document - if they're new to you, spending so
 will be time well spent, and if they're old hat, you'll be in good shape to jump right into the
 SQLAlchemy tutorial.
 
-Key Aspects of Relational Databases
-====================================
+Overview
+========
 
 * Relational Databases, or RDBMS, are databases that draw upon the
   :term:`Relational Model`, created by :term:`Edgar Codd`.
@@ -34,23 +34,649 @@ Key Aspects of Relational Databases
 
 * RDBMSs provide guarantees for data using the :term:`ACID` model.
 
+Schema Concepts
+===============
+
 Table
-=====
+-----
 
 The Table is the basic unit of storage in a relational database, representing a set of rows.
 
 .. image:: review_table.png
 
-At the SQL console, we can create a new table using the CREATE TABLE
-directive.  CREATE TABLE is an example of Data Definition Language, or
-DDL::
+The table encompasses a series of :term:`columns`, each of which describes a particular type
+of data unit within the table.  The data within the table is then organized into
+:term:`rows`, each row containing a single value for each column represented in the table.
 
-	CREATE TABLE employee (
-	     emp_id INTEGER,
-	     emp_name VARCHAR(30),
-	     dep_id INTEGER,
-	     PRIMARY KEY (emp_id)
-	)
+DDL
+---
+
+At the SQL console, we create a new table as a permanent fixture within a
+database schema using the ``CREATE TABLE``
+statement.  The ``CREATE TABLE`` statement is an example of Data Definition Language, or
+:term:`DDL`, which is a subset of SQL:
+
+.. sourcecode:: sql
+
+    CREATE TABLE employee (
+         emp_name VARCHAR(30),
+         dep_id INTEGER
+    )
+
+Primary Keys
+------------
+
+A table can be created with :term:`constraints`, which place rules on
+what specific data values can be present in the table.   One of the
+the most common
+constraints is the :term:`primary key constraint`, which enforces that every
+row of the table must have a uniquely identifying value, consisting of one
+or more columns, where the values can additionally not be NULL.
+A primary key that uses more than one column to produce
+a value is known as a :term:`composite` primary key.
+
+It is a best practice that all tables in a relational database
+contain a primary key.  Two varieties of primary key are :term:`surrogate primary key`
+and :term:`natural primary key`, where the former is specifically a "meaningless"
+value, and the latter is "meaningful".   Which style to use is a hotly debated
+topic; the surrogate key is generally chosen for pragmatic reasons, including
+memory and index performance as well as simplicity when dealing with updates,
+whereas the natural primary key
+is often chosen for being more "correct" and closer to the relational ideal.
+We restate our ``employee`` table below adding a surrogate integer primary key
+on a new column ``emp_id``:
+
+.. sourcecode:: sql
+
+    CREATE TABLE employee (
+         emp_id INTEGER,
+         emp_name VARCHAR(30),
+         dep_id INTEGER,
+         PRIMARY KEY (emp_id)
+    )
+
+
+Foreign Keys
+------------
+
+Once a table is defined as having a primary key constraint,
+another table can be constrained such that its rows may refer
+to a row that is guaranteed to be present in this table.
+This is implemented by establishing a column or columns in the
+"remote" table whose values must match a value of the primary
+key of the "local" table.  Both sets of columns are then named as
+members of a :term:`foreign key constraint`, which instructs
+the database to enforce that values in these "remote" columns are guaranteed
+to be present in the "local" table's set of primary key columns.
+This constraint takes effect at every turn; when rows are inserted
+into the remote table, when rows are modified in the remote table,
+as well as when an attempt is made to delete or update rows in the
+parent table, the database ensures that any value subject to the
+foreign key constraint be present in the set of referenced columns,
+or the statement is rejected.
+
+A foreign key constraint that refers fully to a
+composite primary key is predictably known as a *composite foreign key*.
+It is also possible, in a composite scenario, for a foreign key constraint
+to only refer to a subset of the primary key columns in the
+referenced table, but this is a highly unusual case.
+
+Below,
+the figure illustrates a
+``department`` table which is referred to by the ``employee`` table by
+relating the ``employee.dep_id`` column to the ``department.dep_id``
+column:
+
+.. image:: review_foreignkey.png
+
+The above schema can be created using DDL as follows:
+
+.. sourcecode:: sql
+
+    CREATE TABLE department (
+         dep_id INTEGER,
+         dep_name VARCHAR(30),
+         PRIMARY KEY (dep_id)
+    )
+
+    CREATE TABLE employee (
+         emp_id INTEGER,
+         emp_name VARCHAR(30),
+         dep_id INTEGER,
+         PRIMARY KEY (emp_id),
+         FOREIGN KEY (dep_id)
+           REFERENCES department(dep_id)
+    )
+
+Data Manipulation Language (DML)
+================================
+
+Once we have a schema defined, data can be placed into the tables
+and also modified using another subset of SQL called :term:`data manipulation language`,
+or DML.
+
+Inserts
+-------
+
+New rows are added to a table using the ``INSERT`` statement.  The ``INSERT`` statement
+contains a ``VALUES`` clause which refers to the actual values to be inserted
+into each row.
+
+.. sourcecode:: sql
+
+    INSERT INTO employee (emp_id, emp_name, dep_id)
+                VALUES (1, 'dilbert', 1);
+
+    INSERT INTO employee (emp_id, emp_name, dep_id)
+                VALUES (2, 'wally', 1);
+
+
+Updates
+--------
+
+The ``UPDATE`` statement changes the contents of an existing row, using a ``WHERE`` clause
+to identify those rows which are the target of the update, and a ``SET`` clause which
+identifies those columns which should be modified, as well to what value:
+
+.. sourcecode:: sql
+
+    UPDATE employee SET dep_id=7
+                  WHERE emp_name='dilbert'
+
+
+Deletes
+-------
+
+The ``DELETE`` statement removes rows.  Like the ``UPDATE`` statement, it also uses
+a ``WHERE`` clause to identify those rows which should be deleted:
+
+.. sourcecode:: sql
+
+    DELETE FROM employee WHERE dep_id=1
+
+Selects
+=======
+
+The ``SELECT`` statement is the primary feature of the so-called :term:`data query language`,
+or DQL, subset of SQL.   The ``SELECT`` is where we spend most of our time when
+using relational databases, and allows us to query for rows in a table.
+
+A simple illustration of a ``SELECT`` statement is in the figure below.  Like
+the ``UPDATE`` and ``DELETE`` statements, it also features a ``WHERE`` clause which is the
+primary means of specifying which rows should be selected.
+
+.. image:: review_select.png
+
+An example of a ``SELECT`` that chooses the rows where ``dep_id`` is equal
+to the value ``12``:
+
+.. sourcecode:: sql
+
+    SELECT emp_id, emp_name FROM employee WHERE dep_id=12
+
+The key elements of the above ``SELECT`` statement are:
+
+1. The :term:`FROM clause` illustrates the table or tables from which we are
+   to select rows.
+
+2. The :term:`WHERE clause` illustrates a criteria which we use to filter
+   thowse rows retrieved from the tables in the ``FROM`` clause
+
+3. The :term:`columns clause` is indicated by the list of expressions
+   following the ``SELECT`` keyword and preceding the ``FROM`` keyword, and indicates
+   those values which we'd like to display given each row that we've
+   selected.
+
+With the above rules, our statement might return to us a series of rows
+that look like this, if the ``emp_name`` columns ``wally``, ``dilbert``,
+and ``wendy`` were those who were all linked to ``dep_id=12``::
+
+        emp_id    emp_name
+        -------+------------
+          1    |   wally
+          2    |   dilbert
+          5    |   wendy
+
+
+Ordering
+--------
+
+The ``ORDER BY`` clause may be applied to a ``SELECT`` statement to determine the
+order in which rows are returned.   Ordering is applied to the ``SELECT`` after
+the ``WHERE`` clause.   Below, we illustrate our statement loading employee
+records ordered by name:
+
+.. sourcecode:: sql
+
+    SELECT emp_id, emp_name FROM employee WHERE dep_id=12 ORDER BY emp_name
+
+Our result set then comes back like this::
+
+        emp_id    emp_name
+        -------+------------
+          2    |   dilbert
+          1    |   wally
+          5    |   wendy
+
+Joins
+-----
+
+A ``SELECT`` statement can use a :term:`join` to produce rows from two tables at
+once, usually joining along foreign key references.    The ``JOIN`` keyword
+is used in between two table names inside the ``FROM`` clause of a ``SELECT``
+statement.   The ``JOIN`` also usually includes an ``ON`` clause, which
+specifies a criteria by which the rows from both tables are correlated
+to each other.
+
+The figure below illustrates the behavior of a join, by indicating in the
+central blue box those rows which are *composites* of rows from both "table_1" and "table_2"
+and which satisfy the ``ON`` clause:
+
+.. image:: review_join.png
+
+It's no accident that the blue box looks a lot like a table.  Even though above,
+only "table_1" and "table_2" represent fixed tables, the ``JOIN`` creates
+for us what is essentially a *derived table*, a list of rows that we could
+use in subsequent expressions.
+
+Using our department / employee example, to select employees along with their
+department name looks like:
+
+.. sourcecode:: sql
+
+    SELECT e.emp_id, e.emp_name, d.dep_name
+        FROM employee AS e
+        JOIN department AS d
+          ON e.dep_id=d.dep_id
+       WHERE d.dep_name = 'Software Artistry'
+
+The result set from the above might look like::
+
+        emp_id    emp_name         dep_name
+        -------+------------+--------------------
+          2    |   dilbert  |  Software Artistry
+          1    |   wally    |  Software Artistry
+          5    |   wendy    |  Software Artistry
+
+Left Outer Join
+---------------
+
+A variant of the join is the :term:`left outer join`.  This structure allows
+rows to be returned from the table on the "left" side which don't have any
+corresponding row on the "right" side.   Such as, if we wanted to select
+departments and their employees, but we also wanted to see the names of departments
+that had no employees, we might use a ``LEFT OUTER JOIN``:
+
+.. sourcecode:: sql
+
+    SELECT d.dep_name, e.emp_name
+        FROM department AS d
+        LEFT OUTER JOIN employee AS e
+        ON d.dep_id=e.dep_id
+
+Supposing our company had three departments, where the "Sales" department
+was currently without any employees, we might see a result like this::
+
+           dep_name          emp_name
+      --------------------+------------
+       Management         |   dogbert
+       Management         |   boss
+       Software Artistry  |   dilbert
+       Software Artistry  |   wally
+       Software Artistry  |   wendy
+       Sales              |   <NULL>
+
+There is also a "right outer join", which is the same as left outer join except
+you get all rows on the right side.   However, the "right outer join" is not
+commonly used, as the "left outer join" is widely accepted as proper convention,
+and is arguably less confusing than a right outer join (in any case, right outer joins
+confuse the author!).
+
+Aggregates
+----------
+
+An :term:`aggregate` is a function that produces a single value, given
+many values as input.   A commonly used aggregate function is the ``count()``
+function which, given a series of rows as input, returns the count of those
+rows as a single value.  The ``count()`` function accepts as an argument any
+SQL expression, which we often pass as the wildcard string ``*`` that essentially
+means "all columns" - unlike most aggregate functions, ``count()`` doesn't
+evaluate the meaning its argument, it only counts how many times it is called:
+
+.. sourcecode:: sql
+
+    SELECT count(*) FROM employee
+
+    ?count?
+    -------
+
+       18
+
+Grouping
+--------
+
+The ``GROUP BY`` keyword is applied to a ``SELECT`` statement, and
+breaks up the rows selected by a ``SELECT`` statement into smaller sets
+based on some criteria.   ``GROUP BY`` is commonly used in conjunction with
+aggregates, as it can apply individual subsets of rows to the aggregate
+function, returning an aggregated return value for each group.  The figure below
+illustrates the rows from a table being broken into three sub-groups, based on the
+expression "a", and then the ``SUM()`` aggregate function applied to the value of
+"b" for each group:
+
+.. image:: review_grouping.png
+
+An example of an aggregation / ``GROUP BY`` combination that gives us the count of employees
+per department id:
+
+.. sourcecode:: sql
+
+    SELECT count(*) FROM employee GROUP BY dep_id
+
+The above statement might give us output such as::
+
+    ?count?  |   dep_id
+    ---------+----------
+        2    |     1
+        10   |     2
+        6    |     3
+        9    |     4
+
+Having
+------
+The aggregated values yielded by each aggregate function, after we've grouped
+things with ``GROUP BY``, can be filtered using the ``HAVING`` keyword.
+We can take the above result set and return only those
+rows where more than seven employees are present:
+
+.. sourcecode:: sql
+
+    SELECT count(*) as emp_count FROM employee GROUP BY dep_id HAVING emp_count > 7
+
+The result would be::
+
+    emp_count  |   dep_id
+    -----------+----------
+        10     |     2
+         9     |     4
+
+SELECT Process Summary
+----------------------
+
+It's very helpful (at least the author thinks so) to keep straight exactly
+how ``SELECT`` goes about its work, when given a combination of clauses
+such as ``WHERE``, ``ORDER BY``, ``GROUP BY``, ``HAVING``, and aggregation.
+
+Given a series of rows::
+
+    emp_id    emp_name     dep_id
+    -------+------------+----------
+      1    |   wally    |     1
+      2    |   dilbert  |     1
+      3    |   jack     |     2
+      4    |   ed       |     3
+      5    |   wendy    |     1
+      6    |   dogbert  |     4
+      7    |   boss     |     3
+
+We'll analyze what a ``SELECT`` statement like the following does in a logical sense:
+
+.. sourcecode:: sql
+
+    SELECT count(emp_id) as emp_count, dep_id
+        FROM employee
+        WHERE dep_id=1 OR dep_id=3 OR dep_id=4
+        GROUP BY dep_id
+        HAVING emp_count > 1
+        ORDER BY emp_count, dep_id
+
+1. the ``FROM`` clause is operated upon first.  The table or tables which the statement is to
+   retrieve rows from is resolved; in this case, we start with the set of all rows
+   contained in the ``employee`` table:
+
+.. sourcecode:: sql
+
+        ... FROM employee ...
+
+        emp_id    emp_name     dep_id
+        -------+------------+----------
+          1    |   wally    |     1
+          2    |   dilbert  |     1
+          3    |   jack     |     2
+          4    |   ed       |     3
+          5    |   wendy    |     1
+          6    |   dogbert  |     4
+          7    |   boss     |     3
+
+2. For the set of all rows in the ``employee`` table, each row is tested against the
+   criteria specified in the ``WHERE`` clause.  Only those rows which evaluate to "true"
+   based on this expression are returned.  We now have a subset of rows retrieved
+   from the ``employee`` table:
+
+.. sourcecode:: sql
+
+        ... WHERE dep_id=1 OR dep_id=3 OR dep_id=4 ...
+
+        emp_id    emp_name     dep_id
+        -------+------------+----------
+          1    |   wally    |     1
+          2    |   dilbert  |     1
+          4    |   ed       |     3
+          5    |   wendy    |     1
+          6    |   dogbert  |     4
+          7    |   boss     |     3
+
+3. With the target set of rows assembled, ``GROUP BY`` then organizes the rows into groups,
+   based on the criterion given.  Here we illustrate an "intermediary" result set which
+   we would not actually see as a result, but instead indicates the
+   data that's to be passed on to the next step:
+
+.. sourcecode:: sql
+
+        ... GROUP BY dep_id ...
+
+         "group"    emp_id    emp_name     dep_id
+        ----------+---------+------------+---------
+        dep_id=1  |    1    |   wally    |     1
+                  |    2    |   dilbert  |     1
+                  |    5    |   wendy    |     1
+        ----------+---------+------------+---------
+        dep_id=3  |    4    |   ed       |     3
+                  |    7    |   boss     |     3
+        ----------+---------+------------+---------
+        dep_id=4  |    6    |   dogbert  |     4
+
+4. Aggregate functions are now applied to each group.   We've passed
+   emp_id to the ``count()`` function, which means for group "1" it will
+   receive the values "1", "2", and "5", for group "3" it will
+   receive the values "4" and "7", for group "4" it receives the value
+   "6".  ``count()`` doesn't actually care
+   what the values are, and we could as easily have passed in ``*``, which
+   means "all columns".  However, most aggregate functions do care
+   what the values are, including functions like ``max()``, ``avg()``
+   ``min()`` etc., so it's usually a good habit to be aware of the
+   column expression here.  Below, we observe that the "emp_id" and
+   "emp_name" columns go away, as we've aggregated on the count:
+
+.. sourcecode:: sql
+
+        ... count(emp_id) AS emp_count ...
+
+          emp_count     dep_id
+        ------------+-----------
+             3      |    1
+        ------------+-----------
+             2      |    3
+        ------------+-----------
+             1      |    4
+
+5. Almost through all of our keywords, ``HAVING`` takes effect once we have the aggregations,
+   and acts like a ``WHERE`` clause for aggregate values.   In our statement, it filters
+   out groups that don't have more than one member:
+
+.. sourcecode:: sql
+
+        ... HAVING emp_count > 1 ...
+
+          emp_count     dep_id
+        ------------+-----------
+             3      |    1
+        ------------+-----------
+             2      |    3
+
+
+6. Finally, ``ORDER BY`` is applied last.   It's important to remember in SQL that
+   relational algebra is a language of *sets*, which are inherently un-ordered.
+   In the typical case, all of the work of selecting, aggregating, and filtering
+   our data are done before any ordering is applied, and only right before
+   the final results are returned to us are they ordered:
+
+.. sourcecode:: sql
+
+        ... ORDER BY emp_count, dep_id
+
+          emp_count     dep_id
+        ------------+-----------
+             2      |    3
+        ------------+-----------
+             3      |    1
+
+
+ACID Model
+==========
+
+The flip side to the relational model employed by relational databases is the
+so called transactional model most of them provide.   The term :term:`ACID` is an
+acronym that refers to the principal properties of relational database transactions
+(as well as transactions for any kind of hypothetical database).
+
+
+Atomicity
+---------
+
+:term:`Atomicity` allows multiple statements to proceed within a particular demarcation known
+as a :term:`transaction`, which has a single point of completion known as a :term:`commit`.
+A transation is committed once all the operations within it have completed successfully.
+If any of the operations fail, the transaction can instead be reverted using a :term:`rollback`,
+which reverses all the steps that have proceeded within the transaction.  Atomicity refers
+to the fact that all of these steps proceed or fail as a single unit; it's not possible for
+some of the steps to succeed without all of them succeeding.
+
+Consistency
+-----------
+
+:term:`Consistency` generally refers to the concept of :term:`constraints`, which are typically
+schema-level constructs that establish rules for what kind of data can be placed
+into a table.   Typical constraints include:
+
+    * NOT NULL constraint - value in a column may never be NULL, or non-present.
+
+    * :term:`primary key constraint` - each row must contain a single- or multi-column value
+      that is unique across all other rows in the table, and is the single value
+      that logically identifies the information stored in that row.
+
+    * :term:`foreign key constraint` - a particular column or columns must contain
+      a value that exists elsewhere in a different row, usually of a different table.
+      The foreign key constraint is the building block by which the rows of many
+      flat tables can be composed together to form more intricate geometries.
+
+    * :term:`unique constraint` - similar to the primary key constraint, the unique
+      constraint identifies any arbitrary column or set of columns that also
+      must be unique throughout the whole table, without themselves comprising
+      the primary key.
+
+    * :term:`check constraint` - Any arbitrary expression can be applied to a row,
+      which will result in that row being rejected if the expression does not
+      evaluate to "true".
+
+Constraints are a sometimes misunderstood concept, that when properly used can give
+a developer a strong "peace of mind", knowing that even in the face of errors,
+mistakes, or omissions within applications that communicate with the database,
+the database itself will remain in a *consistent* state, rather than running the
+risk of accumulating ongoing data errors that are only detected much later when
+it's too late.   This "peace of mind" allows us to write and test our applications
+more quickly and boldly than we would be able to otherwise; more quickly because
+the relational database already does lots of the integrity checking we'd otherwise
+have to write by hand, and more boldly because we can produce test code more
+quickly without as much risk of corrupting our data as if we hadn't used constraints.
+
+Isolation
+----------
+
+:term:`Isolation` is a complex subject which in a general sense refers to the interactivity
+between *concurrent* transactions, that is, more than one transaction occuring at the
+same time.  It is focused on the degree to which the work being performed by a particular
+transaction may be viewed by other transactions going on at the same time.
+The isolation of concurrent transactions is an important area of consideration when
+constructing an application, as in many cases the decisions that are made within
+the scope of a transaction may be affected by this cross-transaction visibility;
+the isolation behavior can also have a significant impact on database performance.
+While there are techniques by which one doesn't have to worry too often about isolation,
+in many cases dealing with the specifics of isolation is unavoidable, and no one
+isolation behavior is appropriate in all cases.
+
+In practice, the level of isolation between transactions is usually placed into
+four general categories (there are actually a lot more categories for people who
+are really into this stuff):
+
+* Read uncommitted - This is the lowest level of isolation.   In this mode,
+  transactions are subject to so-called *dirty reads*, whereby
+  the work that proceeds within a transaction is plainly visible to other transactions
+  as it proceeds.   With dirty reads, a transaction might UPDATE a row with updated
+  data, and this updated row is now globally visible by other transactions.   If the
+  transaction is rolled back, all the other transactions will be exposed to this
+  rollback as well.
+
+* Read committed - In read committed, we're no longer subject to dirty reads, and
+  any data that we read from concurrent transactions is guaranteed to have been
+  committed.  However, as we proceed within our own transaction, we can still see
+  the values of rows and SELECT statements change, as concurrent transactions
+  continue to commit modifications to rows that we're also looking at.
+
+* Repeatable Read - The next level operates at the row level, and adds the behavior
+  such that any individual row that we read using a SELECT statement will remain
+  consistent from that point on, relative to our transaction.  That is, if we read
+  the row with primary key "5" from the ``employee`` table, and in the course of
+  our work a concurrent transaction updates the ``emp_name`` column from "Ed" to
+  "Edward", when we re-SELECT this row, we will still see the value "Ed" - that is,
+  the value of this row remains consistent from the first time we read it on forward.
+  If we ourselves attempt to update the row again, we may be subject to a conflict when
+  we attempt to commit the transaction.
+
+  Within repeatable read, we are still subject to the concept of a so-called
+  *phantom read* - this refers to a row that we see in one SELECT statement that
+  we later (or previously) do not see in a different SELECT statement, because
+  a concurrent transaction has deleted or inserted that row since we last selected
+  with that criterion.
+
+* Serializable - Generally considered to be the highest level of isolation, the rough
+  idea of serializable isolation is that we no longer have phantom reads -
+  if we select a series of N rows using a SELECT statement, we can be guaranteed that
+  we will always get those same N rows when emitting a subsequent SELECT of the
+  same criteria, even if concurrent transactions have INSERTed or DELETed rows
+  from that table.
+
+Overall, a higher level of isolation is usually associated with
+degraded transaction performance, as a database must typically use locks to prevent
+two transactions from operating on the same data at the same time.   Historically,
+locks were the only means available to relational databases in order to achieve this.
+However, most modern relational databases employ a concept known as :term:`multi version
+concurrency control` in order to greatly reduce the need for locking, by assigning
+to each transaction a unique identifier that is then applied to *copies* of rows
+created locally to each transaction.  As a transaction commits its data, it's private copies
+of rows become the official "rows of record" for the database as a whole.
+
+Durability
+----------
+
+:term:`Durability` basically means that relational databases provide a guarantee that once a
+transaction COMMIT has succeeded, the data is safely written to disk, and the chance of
+that data being lost due to a system failure is low to nil.   Durability tends to be something
+most developers take for granted when working with relational databases; however, in recent
+years it's been discussed a lot more with the rise of so-called NoSQL databases, which in some
+cases attempt to scale back the promise of durability in exchange for faster transaction
+throughput.
+
 
 
 

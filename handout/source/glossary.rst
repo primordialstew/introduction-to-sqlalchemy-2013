@@ -265,7 +265,7 @@ Glossary
 
         .. seealso::
 
-            :ref:`using the session <sqla:session>`
+            :ref:`session_toplevel`
 
     session transaction
         ORM-level transaction. Session activity may span multiple
@@ -319,7 +319,7 @@ Glossary
         in turn, and returns one combined row for each pair that
         matches an ON criteria.
 
-        e.g.::
+        .. sourcecode:: sql
 
             SELECT * FROM users JOIN addresses ON users.id = addresses.user_id
 
@@ -338,7 +338,7 @@ Glossary
         rows, returns a row containing the columns of the left row
         plus NULLs for every column in the right table.
 
-        e.g.::
+        .. sourcecode:: sql
 
             SELECT * FROM users
                 LEFT OUTER JOIN addresses ON users.id = addresses.user_id
@@ -382,7 +382,7 @@ Glossary
         single row. Scalar subqueries can be used like columns or anywhere
         an expression is required.
 
-        e.g.::
+        .. sourcecode:: sql
 
             SELECT users.name FROM users WHERE id=1
 
@@ -397,7 +397,9 @@ Glossary
             ---------------+----------
              jack@jack.com | jack
 
-        They are also useful in the WHERE clause of a query::
+        They are also useful in the WHERE clause of a query:
+
+        .. sourcecode:: sql
 
             SELECT addresses.email FROM addresses
             WHERE addresses.user_id=(SELECT id FROM users WHERE name='jack')
@@ -411,8 +413,7 @@ Glossary
         isolation, without referring to the enclosing SELECT
         statement.
 
-        e.g.::
-
+        .. sourcecode:: sql
 
             SELECT users.name FROM users
             WHERE users.id IN (SELECT user_id FROM addresses)
@@ -427,7 +428,7 @@ Glossary
         A subquery is correlated if it depends on data in the
         enclosing SELECT.
 
-        e.g.::
+        .. sourcecode:: sql
 
             SELECT users.name, addresses.email
              FROM users
@@ -446,7 +447,7 @@ Glossary
         A comparison operator.  Compares an expression against a list of
         values, and is true if it matches at least one of them.
 
-        e.g.::
+        .. sourcecode:: sql
 
             SELECT email FROM addresses
             WHERE user_id IN (1, 2)
@@ -457,7 +458,9 @@ Glossary
             ed@yahoo.com
             ed@msn.com
 
-        A subquery can be used in place of a literal list of values::
+        A subquery can be used in place of a literal list of values:
+
+        .. sourcecode:: sql
 
             SELECT email FROM addresses
             WHERE user_id IN
@@ -472,7 +475,9 @@ Glossary
     EXISTS
     EXISTS operator
         The EXISTS operator tests a subquery and returns true if the
-        subquery returns any rows::
+        subquery returns any rows:
+
+        .. sourcecode:: sql
 
             SELECT name FROM users
              WHERE EXISTS
@@ -487,7 +492,9 @@ Glossary
         The columns selected by the subquery are ignored.  Only the
         number of rows are considered: no rows or at least one.
         EXISTS <subquery> is a complete expression and can be combined
-        normally with other criteria in a WHERE clause::
+        normally with other criteria in a WHERE clause:
+
+        .. sourcecode:: sql
 
             SELECT name FROM users
               WHERE EXISTS (SELECT * FROM addresses WHERE addresses.user_id=users.id)
@@ -513,9 +520,9 @@ Glossary
 
         .. seealso::
 
-           * :term:`joined table inheritance`
+           :term:`joined table inheritance`
 
-           * :term:`concrete table inheritance`
+           :term:`concrete table inheritance`
 
     joined table inheritance
         Columns for classes in an inheritance hierarchy are stored in one
@@ -526,8 +533,7 @@ Glossary
         base class table also contains a discriminator column to identify
         the type of any given row.
 
-        e.g.::
-
+        .. sourcecode:: sql
 
             CREATE TABLE payment (
                 id SERIAL PRIMARY KEY,
@@ -587,7 +593,7 @@ Glossary
         columns used by its class, and primary key values are not
         unique among tables.  The tables are fully independent.
 
-        E.g.::
+        .. sourcecode:: sql
 
             CREATE TABLE check_payment (
                 id SERIAL PRIMARY KEY,
@@ -627,7 +633,9 @@ Glossary
 
     many to many
         An intermediary table modeling a many-to-many relationship.
-        Given::
+        Given:
+
+        .. sourcecode:: sql
 
             CREATE TABLE cars (
                 car_id INTEGER PRIMARY KEY,
@@ -640,7 +648,7 @@ Glossary
         and the relationship "car models are available in multiple colors",
         the relation can be modeled with a two-column table:
 
-        ::
+        .. sourcecode:: sql
 
             CREATE TABLE car_colors (
                 car_id INTEGER REFERENCES cars (car_id),
@@ -656,7 +664,7 @@ Glossary
         A :term:`relationship` between two tables that is further
         qualified by information specific to each pair of linked rows:
 
-        ::
+        .. sourcecode:: sql
 
             CREATE TABLE cars (
                 car_id INTEGER PRIMARY KEY,
@@ -670,7 +678,7 @@ Glossary
         each for a limited time-span", the relation can be modeled with an
         association table containing additional columns:
 
-        ::
+        .. sourcecode:: sql
 
             CREATE TABLE car_colors (
                 car_id INTEGER REFERENCES cars (car_id),
