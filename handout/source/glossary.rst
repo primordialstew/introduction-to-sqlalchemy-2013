@@ -22,13 +22,15 @@ Relational Terms
     constraint
     constraints
         Rules established within a relational database that ensure
-        the validity and consistency of data in a relational database.
+        the validity and consistency of data.   Common forms
+        of constraint include :term:`primary key constraint`,
+        :term:`foreign key constraint`, and :term:`check constraint`.
 
         .. seealso::
 
             :ref:`consistency`
 
-
+    primary key
     primary key constraint
 
         A :term:`constraint` that uniquely defines the characteristics
@@ -86,13 +88,13 @@ Relational Terms
 
         .. seealso::
 
-            :ref:`primary key`
+            :ref:`primary_key`
 
             http://en.wikipedia.org/wiki/Candidate_key
 
     check constraint
 
-        A check constraint (also known as table check constraint) is a
+        A check constraint is a
         condition that defines valid data when adding or updating an
         entry in a table of a relational database. A check constraint
         is applied to each row in the table.
@@ -129,14 +131,9 @@ Relational Terms
 
     ACID
     ACID model
-        In computer science, ACID (Atomicity, Consistency, Isolation,
-        Durability) is a set of properties that guarantee that
-        database transactions are processed reliably. In the context
-        of databases, a single logical operation on the data is called
-        a transaction. For example, a transfer of funds from one bank
-        account to another, even involving multiple changes such as
-        debiting one account and crediting another, is a single
-        transaction.
+        An acronym for "Atomicity, Consistency, Isolation,
+        Durability"; a set of properties that guarantee that
+        database transactions are processed reliably.
         (via Wikipedia)
 
         .. seealso::
@@ -146,7 +143,8 @@ Relational Terms
             http://en.wikipedia.org/wiki/ACID_Model
 
     atomicity
-        Atomicity requires that each transaction is "all or nothing":
+        Atomicity is one of the components of the :term:`ACID` model,
+        and requires that each transaction is "all or nothing":
         if one part of the transaction fails, the entire transaction
         fails, and the database state is left unchanged. An atomic
         system must guarantee atomicity in each and every situation,
@@ -160,10 +158,11 @@ Relational Terms
             http://en.wikipedia.org/wiki/Atomicity_(database_systems)
 
     consistency
-        The consistency property ensures that any transaction will
+        Consistency is one of the compoments of the :term:`ACID` model,
+        and ensures that any transaction will
         bring the database from one valid state to another. Any data
         written to the database must be valid according to all defined
-        rules, including but not limited to constraints, cascades,
+        rules, including but not limited to :term:`constraints`, cascades,
         triggers, and any combination thereof.
         (via Wikipedia)
 
@@ -174,7 +173,8 @@ Relational Terms
             http://en.wikipedia.org/wiki/Consistency_(database_systems)
 
     isolation
-        The isolation property ensures that the concurrent execution
+        The isolation property of the :term:`ACID` model
+        ensures that the concurrent execution
         of transactions results in a system state that would be
         obtained if transactions were executed serially, i.e. one
         after the other. Each transaction must execute in total
@@ -189,7 +189,8 @@ Relational Terms
             http://en.wikipedia.org/wiki/Isolation_(database_systems)
 
     durability
-        Durability means that once a transaction has been committed,
+        Durability is a property of the :term:`ACID` model
+        which means that once a transaction has been committed,
         it will remain so, even in the event of power loss, crashes,
         or errors. In a relational database, for instance, once a
         group of SQL statements execute, the results need to be stored
@@ -219,6 +220,9 @@ Relational Terms
 
             COMMIT
 
+        Above, the row ``employee`` rows for ``dilbert`` and ``wally``
+        will be permanently available following the ``COMMIT`` statement.
+
     rollback
         Denotes a premature end to a :term:`transaction` which reverses
         all the effects of the transaction that have proceeded thus far; the
@@ -237,6 +241,9 @@ Relational Terms
 
             ROLLBACK
 
+        Above, no new rows will be present in the database following
+        the ``ROLLBACK`` statement; both rows inserted for ``dilbert``
+        and ``wally`` will be discarded.
 
     multi version concurrency control
     MVCC
@@ -247,6 +254,8 @@ Relational Terms
         that they were begun.
 
         .. seealso::
+
+            :ref:`isolation`
 
             http://en.wikipedia.org/wiki/Multiversion_concurrency_control
 
@@ -283,19 +292,89 @@ Relational Terms
 
 
     surrogate primary key
-        (define)
+
+        A :term:`primary key` that is not derived from application
+        data.
+
+        (via Wikipedia)
+
+        Surrogate primary keys in practice are often
+        integer values generated by database sequences
+        or other incrementing counters,
+        or less commonly global unique identifiers (GUIDs).
+
+        .. seealso::
+
+            :term:`natural primary key`
+
+            http://en.wikipedia.org/wiki/Surrogate_key
 
     natural primary key
-        (define)
+
+        A :term:`primary key` that is formed of attributes that
+        already exist in the real world. For example, a USA citizen's
+        social security number could be used as a natural key. In
+        other words, a natural key is a :term:`candidate key` that has a
+        logical relationship to the attributes within that :term:`row`.
+
+        (via Wikipedia)
+
+        .. seealso::
+
+            :term:`surrogate primary key`
+
+            http://en.wikipedia.org/wiki/Natural_key
 
     FROM clause
-        (define)
+        A component of the ``SELECT`` statement which specifies the source
+        tables or subqueries from which rows are to be selected.  The ``FROM``
+        clause follows the :term:`columns clause` and may contain a comma-separated
+        list of tables and subqueries, as well as :term:`join` expressions:
+
+        .. sourcecode:: sql
+
+            -- FROM clause illustrating an explicit join
+
+            SELECT id, name, email_address
+             FROM user_account
+             JOIN email_address ON user_account.id=email_address.user_account_id
+
+            -- FROM clause illustrating an implicit join
+
+            SELECT id, name, email_address
+             FROM user_account, email_address
+             WHERE user_account.id=email_address.user_account_id
 
     WHERE clause
-        (define)
+        A component of the ``SELECT`` statement which specifies logical criteria
+        to be applied to each row retrieved from the :term:`FROM clause`.
+        The ``SELECT`` statement discards all rows which do not evaluate to
+        "true" for a given WHERE clause.
+
+        Below, we select rows from the ``email_address`` table, but use the
+        WHERE clause to limit those rows to only those which refer to email
+        addresses that contain ``@gmail.com``:
+
+        .. sourcecode:: sql
+
+            SELECT id, email_address FROM email_address
+            WHERE email_address LIKE '%@gmail.com'
+
 
     columns clause
-        (define)
+        The portion of a ``SELECT`` statement that enumerates a series of SQL
+        expressions to be evaulated as the returned result set.  Typically,
+        these expressions refer directly to table columns.  The columns
+        clause follows the ``SELECT`` keyword and precedes the ``FROM``
+        keyword.
+
+        In the following ``SELECT`` statement, the "id" and "name" columns
+        will be returned for each row, and this enumeration of columns
+        forms the "columns clause":
+
+        .. sourcecode:: sql
+
+            SELECT id, name FROM user_account
 
 
     column
@@ -387,13 +466,21 @@ Relational Terms
 
             http://en.wikipedia.org/wiki/Sql
 
+    cartesian product
+        A mathematical operation which returns a set (or product set) from multiple sets.
+        The Cartesian product is the result of crossing members of each set with one another.
+        (via Wikipedia)
+
+        .. seealso::
+
+            http://en.wikipedia.org/wiki/Cartesian_product
 
     relation
     relations
         In :term:`relational algebra`, a single grid of data represented by
         zero or more :term:`tuples`. In a SQL database, the most common
         relation is the :term:`table`, which defines one or more columns of zero
-        or more :term:`rows`. The output of a SELECT statement is also a relation.
+        or more :term:`rows`. The output of a ``SELECT`` statement is also a relation.
 
 
     data manipulation language
@@ -440,52 +527,105 @@ Relational Terms
 
         .. sourcecode:: sql
 
-            SELECT * FROM user_account JOIN email_address ON user_account.id = email_address.user_account_id
+            SELECT ua.id, ua.name, ea.email, ea.user_account_id
+             FROM user_account AS ua
+              JOIN email_address AS ea
+              ON ua.id = ea.user_account_id
 
-             id | name  | id |     email     | user_account_id
-            ----+-------+----+---------------+---------
-              1 | jack  |  1 | jack@jack.com |       1
-              2 | ed    |  2 | ed@yahoo.com  |       2
-              2 | ed    |  3 | ed@msn.com    |       2
-              3 | wendy |  4 | wendy@nyt.com |       3
+             id | name  |      email     | user_account_id
+            ----+-------+----------------+----------------
+              1 | jack  |  jack@jack.com |       1
+              2 | ed    |  ed@yahoo.com  |       2
+              2 | ed    |  ed@msn.com    |       2
+              3 | wendy |  wendy@nyt.com |       3
 
-    left outer join
-        Combines the rows of two tables. Using an ON criteria,
-        compares each row in the first table listedthe left
-        tableagainst each row in the right table.  Any matches are
-        returned like an inner join.  If a left row matches no right
-        rows, returns a row containing the columns of the left row
-        plus NULLs for every column in the right table.
+        The result of the join can be defined in a logical
+        sense by first
+        determining the :term:`cartesian product` of the left and
+        right side tables; then, for each row within this product,
+        evaluating ``ON`` clause for each row, selecting only those
+        rows for which the clause evaluates to "true".
+        In practice, relational database systems
+        use more efficient approaches internally in order to evaluate
+        the result of a join.
+
+        Usage of the ``JOIN`` or ``INNER JOIN`` keyword is logically
+        equivalent to a so-called *implicit join*, where the ``JOIN``
+        keyword is not present, and instead the left and right side
+        expressions are delivered to the :term:`FROM clause` as a comma
+        separated list, with the ON criteria stated instead in
+        the ``WHERE`` clause:
 
         .. sourcecode:: sql
 
-            SELECT * FROM user_account
-                LEFT OUTER JOIN email_address ON user_account.id = email_address.user_account_id
+            SELECT ua.id, ua.name, ea.email, ea.user_account_id
+             FROM user_account AS ua, email_address.ea
+             WHERE ua.id = ea.user_account_id
 
-             id | name  | id |     email     | user_account_id
-            ----+-------+----+---------------+---------
-              1 | jack  |  1 | jack@jack.com |       1
-              2 | ed    |  3 | ed@msn.com    |       2
-              2 | ed    |  2 | ed@yahoo.com  |       2
-              3 | wendy |  4 | wendy@nyt.com |       3
-              4 | mary  |    |               |
+
+        .. seealso::
+
+            :term:`left outer join`
+
+            http://en.wikipedia.org/wiki/Sql_join
+
+
+    left outer join
+        A variant of the :term:`join` whereby the criteria for
+        including rows from the "left" side is relaxed, such that
+        not only left-side rows which correspond to the right side
+        are returned, but also left-side rows for which no right
+        side row corresponds.   In the case where no right
+        side row corresponds, all columns from the right side
+        are returned as NULL.
+
+        Below, we illustrate selecting all user names from the
+        ``user_account`` table, in addition to all the ``email_address``
+        rows for each ``user_account`` row, but also including
+        rows from ``user_account`` for which no row in ``email_address``
+        is present:
+
+        .. sourcecode:: sql
+
+
+            SELECT ua.id, ua.name, ea.email, ea.user_account_id
+             FROM user_account AS ua
+              JOIN email_address AS ea
+              ON ua.id = ea.user_account_id
+
+             id | name  |      email     | user_account_id
+            ----+-------+----------------+----------------
+              1 | jack  |  jack@jack.com |       1
+              2 | ed    |  ed@yahoo.com  |       2
+              2 | ed    |  ed@msn.com    |       2
+              3 | wendy |  wendy@nyt.com |       3
+              4 | mary  |     (null)     |     (null)
+
+        The left outer join is a key technique used in object relational
+        systems in order to resolve a :term:`one to many` collection,
+        that is a series of objects that contain zero or more related objects.
+
+        .. seealso::
+
+            :term:`join`
 
     right outer join
-        Like a left outer join, except the tables are swapped.  At least
+        Like a :term:`left outer join`, except the left and right side
+        are swapped.  At least
         one row will be returned for every row in the right table, and
         columns from the left row will be filled with NULL if the ON
         criteria does not match.  In SQLAlchemy, outer joins are left
         outer join.
 
     subquery
-        A SELECT statement embedded in another SELECT statement.  Data
-        returned from the inner SELECT is available for use by the
+        A ``SELECT`` statement embedded in another ``SELECT`` statement.  Data
+        returned from the inner ``SELECT`` is available for use by the
         outer.
 
         The subquery is a fundamental capability in SQL that allows
         so-called *derived tables* to be created; meaning, the rows
-        from a particular SELECT statement can be named as a unit of
-        rows within an enclosing SELECT that causes it to behave more or
+        from a particular ``SELECT`` statement can be named as a unit of
+        rows within an enclosing ``SELECT`` that causes it to behave more or
         less like a plain :term:`table`.
 
         Example:
@@ -499,37 +639,45 @@ Relational Terms
                 ON user_account.id=subq.user_account_id
 
         Subqueries can be placed in a variety of ways inside of an enclosing
-        SELECT statement.    Three common locations include the :term:`columns clause`,
+        ``SELECT`` statement.    Three common locations include the :term:`columns clause`,
         the :term:`WHERE clause`, and the :term:`FROM clause`.   The placement
         of the subquery has an impact on the kind of data the query must return.
-        In standard SQL, subqueries placed within the columns or WHERE clause must always
-        be :term:`scalar subqueries`, that return a single value.   These
-        subqueries are usually :term:`correlated subqueries` as well.
-        A subquery used in the FROM clause on the other hand can return
-        any number of rows and columns, but must be an :term:`uncorrelated subquery`.
+        In standard SQL, subqueries placed within the columns or WHERE clause must
+        be :term:`scalar subqueries`, i.e. queries that return a single value, unless
+        they are evaluated by a boolean aggregation operator such as :term:`IN`,
+        :term:`EXISTS`, ``ANY`` or ``ALL``.   A subquery used in the :term:`FROM clause`,
+        on the other hand, can return any number of rows and columns.
+
+        Subqueries within the WHERE clause or columns clause are often :term:`correlated subqueries`
+        as well, as they are invoked for each row received in the enclosing query.
+        For a FROM clause subquery, correlation is not an option as the FROM clause
+        is evaluated before the correlatable rows are chosen.
 
     scalar subquery
     scalar subqueries
         A scalar subquery is a :term:`subquery` that returns a single column from a
-        single row. Scalar subqueries can be used like columns or anywhere
-        an expression is required.
+        single row.  Scalar subqueries can be used like columns or anywhere
+        an expression is required, which typically includes the :term:`columns clause`
+        or :term:`WHERE clause` of a ``SELECT`` statement.
+
+        Below, a scalar subquery is used in the columns clause to select the ``name``
+        column from the ``user_account`` table for each row selected from the
+        ``email_address`` table:
 
         .. sourcecode:: sql
 
-            SELECT user_account.name FROM user_account WHERE id=1
 
-             name
-            ------
-             jack
-
-            SELECT email_address.email, (SELECT user_account.name FROM user_account WHERE id=1)
+            SELECT
+                email_address.email,
+                (SELECT user_account.name FROM user_account WHERE id=1) AS name
             FROM email_address WHERE email_address.user_account_id=1
 
-                 email     | ?column?
+                 email     | name
             ---------------+----------
              jack@jack.com | jack
 
-        They are also useful in the WHERE clause of a query:
+        Selecting an email address by user name, using a scalar subquery
+        in the ``WHERE`` clause:
 
         .. sourcecode:: sql
 
@@ -542,7 +690,7 @@ Relational Terms
 
     uncorrelated subquery
         A :term:`subquery` is uncorrelated if the database can execute it in
-        isolation, without referring to the enclosing SELECT
+        isolation, without referring to the enclosing ``SELECT``
         statement.
 
         .. sourcecode:: sql
@@ -559,21 +707,35 @@ Relational Terms
     correlated subquery
     correlated subqueries
         A :term:`subquery` is correlated if it depends on data in the
-        enclosing SELECT.
+        enclosing ``SELECT``.
+
+        Below, a subquery selects the aggregate value ``MIN(a.id)``
+        from the ``email_address`` table, such that
+        it will be invoked for each value of ``user_account.id``, correlating
+        the value of this column against the ``email_address.user_account_id``
+        column:
 
         .. sourcecode:: sql
 
             SELECT user_account.name, email_address.email
              FROM user_account
              JOIN email_address ON user_account.id=email_address.user_account_id
-             WHERE email_address.id = (SELECT MIN(a.id) FROM email_address AS a
-             WHERE a.user_account_id=user_account.id)
+             WHERE email_address.id = (
+                SELECT MIN(a.id) FROM email_address AS a
+                WHERE a.user_account_id=user_account.id
+             )
 
-              name  |     email
-             -------+---------------
-              jack  | jack@jack.com
-              ed    | ed@yahoo.com
-              wendy | wendy@nyt.com
+        The above subquery refers to the ``user_account`` table, which is not itself
+        in the ``FROM`` clause of this nested query.   Instead, the ``user_account``
+        table is recieved from the enclosing query, where each row selected from
+        ``user_account`` results in a distinct execution of the subquery.
+
+        A correlated subquery is nearly always present in the :term:`WHERE clause`
+        or :term:`columns clause` of the enclosing ``SELECT`` statement, and never
+        in the :term:`FROM clause`; this is because
+        the correlation can only proceed once the original source rows from the enclosing
+        statement's FROM clause are available.
+
 
     IN
     IN operator
@@ -585,13 +747,8 @@ Relational Terms
             SELECT email FROM email_address
             WHERE user_account_id IN (1, 2)
 
-                 email
-            ---------------
-            jack@jack.com
-            ed@yahoo.com
-            ed@msn.com
 
-        A subquery can be used in place of a literal list of values:
+        A :term:`subquery` can be used in place of a literal list of values:
 
         .. sourcecode:: sql
 
@@ -599,11 +756,6 @@ Relational Terms
             WHERE user_account_id IN
             (SELECT id FROM user_account WHERE name='jack' OR name='ed')
 
-                email
-            ---------------
-              jack@jack.com
-              ed@yahoo.com
-              ed@msn.com
 
     EXISTS
     EXISTS operator
@@ -624,8 +776,8 @@ Relational Terms
 
         The columns selected by the subquery are ignored.  Only the
         number of rows are considered: no rows or at least one.
-        EXISTS <subquery> is a complete expression and can be combined
-        normally with other criteria in a WHERE clause:
+        ``EXISTS <subquery>`` is a :term:`scalar`, boolean expresion
+        and can be used like any other boolean value in a WHERE clause:
 
         .. sourcecode:: sql
 
@@ -636,6 +788,9 @@ Relational Terms
              name
             ------
               ed
+
+        The subquery used within an ``EXISTS`` expression is nearly always
+        a :term:`correlated subquery`.
 
 
 .. _glossary_sqlalchemy:
@@ -805,10 +960,9 @@ SQLAlchemy Core / Object Relational Terms
         into a properly ordered series of INSERT, UPDATE and DELETE
         statements.
 
-
+    scalar
     scalar value
         A single value, such as ``'a'``, ``123`` or ``'2008-02-01'``.
-
 
     single table inheritance
         Columns for all classes in an inheritance hierarchy are stored

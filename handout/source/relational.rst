@@ -679,15 +679,21 @@ are really into this stuff):
   same criteria, even if concurrent transactions have INSERTed or DELETed rows
   from that table.
 
-Overall, a higher level of isolation is usually associated with
-degraded transaction performance, as a database must typically use locks to prevent
-two transactions from operating on the same data at the same time.   Historically,
-locks were the only means available to relational databases in order to achieve this.
-However, most modern relational databases employ a concept known as :term:`multi version
-concurrency control` in order to greatly reduce the need for locking, by assigning
+The impact of using a higher level of isolation depends much on the specifics of
+the database in use.   Generally, lower levels of isolation are often
+associated with higher performance and a reduced chance of :term:`deadlocks`.
+Historically, this is due to the fact that
+a lower level of isolation has less of a need to synchronize concurrent operations
+using locks.   However, most modern relational databases employ a
+concept known as :term:`multi version concurrency control` in order to
+reduce or eliminate the need for locking, by assigning
 to each transaction a unique identifier that is then applied to *copies* of rows
-created locally to each transaction.  As a transaction commits its data, it's private copies
+created locally to each transaction.  As a transaction commits its data, its private copies
 of rows become the official "rows of record" for the database as a whole.
+An MVCC scheme may still introduce performance overhead with higher isolation
+levels, as such systems must monitor and report so-called
+*serialization failures*, which are the rejection of transactions that
+conflict with another one executing concurrently.
 
 .. _durability:
 
