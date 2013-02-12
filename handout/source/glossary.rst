@@ -911,17 +911,194 @@ SQLAlchemy Core / Object Relational Terms
             :ref:`sqla:metadata_toplevel`
 
     attribute
-        In Python, a field of an instance or class.  In SQLAlchemy,
-        managed instance attributes are instrumented to detect
-        changes, and class attributes can be used in the construction
-        of queries.
+        In Python, a field of an instance or class.   Essentially, any time
+        the "." operator is used to access a field from a parent record, you're
+        dealing with attribute access.
+
+        Below, the ``Car`` class has attributes ``color`` and ``model``::
+
+            class Car(object):
+                color = "green"
+                model = "Dodge"
+
+        and attributes are accessed using the "." operator::
+
+            print("Color: %s" % Car.color)
+
+        In SQLAlchemy, an ORM :term:`mapped` class is :term:`instrumented` using
+        Python :term:`descriptors` to provide attributes that have
+        additional behaviors used by the mapper, including that changes
+        in value are detected and also that SQL load operations can
+        transparently occur when they are first accessed (known as
+        :term:`lazy loading`).
+
+
+    descriptor
+    descriptors
+        In Python, a descriptor is an object attribute with “binding behavior”, one whose attribute access has been overridden by methods in the `descriptor protocol <http://docs.python.org/howto/descriptor.html>`_.
+        Those methods are __get__(), __set__(), and __delete__(). If any of those methods are defined
+        for an object, it is said to be a descriptor.
+
+        In SQLAlchemy, descriptors are used heavily in order to provide attribute behavior
+        on mapped classes.   When a class is mapped as such::
+
+            class MyClass(Base):
+                __tablename__ = 'foo'
+
+                id = Column(Integer, primary_key=True)
+                data = Column(String)
+
+        The ``MyClass`` class will be :term:`mapped` when its definition
+        is complete, at which point the ``id`` and ``data`` attributes,
+        starting out as :class:`sqlalchemy.schema.Column` objects, will be replaced
+        by the :term:`instrumentation` system with customized
+        descriptor objects, providing special behavior for the
+        ``__get__()``, ``__set__()`` and ``__delete__()`` methods.   The
+        descriptors (for the curious, they are instances of
+        :class:`sqlalchemy.orm.attributes.InstrumentedAttribute`, though this detail
+        is generally transparent) will generate a SQL expression when used at the class level::
+
+            >>> print MyClass.data == 5
+            data = :data_1
+
+        When used at the instance level, these descriptors help to keep
+        track of changes to values, and also :term:`lazy load` unloaded values
+        and collections from the database when the attribute is accessed::
+
+            >>> m1 = MyClass()
+            >>> m1.id = 5
+            >>> m1.data = "some data"
+
+            >>> from sqlalchemy import inspect
+            >>> inspect(m1).attrs.data.history.added
+            "some data"
+
+    instrumentation
+    instrumented
+        Instrumentation refers to the process of augmenting the functionality
+        and attribute set of a particular class.   Ideally, the
+        behavior of the class should remain close to a regular
+        class, except that additional behviors and features are
+        made available.  The SQLAlchemy :term:`mapping` process,
+        among other things, adds database-enabled :term:`descriptors`
+        to a mapped
+        class which each represent a particular database column
+        or relationship to a related class.
+
+
+    lazy load
+    lazy loads
+    lazy loading
+        In object relational mapping, a "lazy load" refers to an
+        attribute that does not contain its database-side value
+        for some period of time, typically when the object is
+        first loaded.  Instead, the attribute receives a
+        *memoization* that causes it to go out to the database
+        and load its data when it's first used.   Using this pattern,
+        the complexity and time spent within object fetches can
+        sometimes be reduced, in that
+        attributes for related tables don't need to be addressed
+        immediately.
+
+        .. seealso::
+
+            `Lazy Load (on Martin Fowler) <http://martinfowler.com/eaaCatalog/lazyLoad.html>`_
+
+            :term:`N plus one problem`
+
+
+    N plus one problem
+        The N plus one problem is a common side effect of the
+        :term:`lazy load` pattern, whereby an application wishes
+        to iterate through a related attribute or collection on
+        each member of a result set of objects, where that
+        attribute or collection is set to be loaded via the lazy
+        load pattern.   The net result is that a SELECT statement
+        is emitted to load the initial result set of parent objects;
+        then, as the application iterates through each member,
+        an additional SELECT statement is emitted for each member
+        in order to load the related attribute or collection for
+        that member.  The end result is that for a result set of
+        N parent objects, there will be N + 1 SELECT statements emitted.
+
+        The N plus one problem is alleviated using :term:`eager loading`.
+
+    DBAPI
+        DBAPI is shorthand for the phrase "Python Database API
+        Specification".  This is a widely used specification
+        within Python to define common usage patterns for all
+        database connection packages.   The DBAPI is a "low level"
+        API which is typically the lowest level system used
+        in a Python application to talk to a database.  SQLAlchemy's
+        :term:`dialect` system is constructed around the
+        operation of the DBAPI, providing individual dialect
+        classes which service a specific DBAPI on top of a
+        specific database engine; for example, the :func:`.create_engine`
+        URL ``postgresql+psycopg2://@localhost/test``
+        refers to the :mod:`psycopg2 <.postgresql.psycopg2>`
+        DBAPI/dialect combination, whereas the URL ``mysql+mysqldb://@localhost/test``
+        refers to the :mod:`MySQL for Python <.mysql.mysqldb>`
+        DBAPI DBAPI/dialect combination.
+
+        .. seealso::
+
+            `PEP 249 - Python Database API Specification v2.0 <http://www.python.org/dev/peps/pep-0249/>`_
+
+
+    unit of work
+        This pattern is where the system transparently keeps
+        track of changes to objects and periodically flushes all those
+        pending changes out to the database. SQLAlchemy's Session
+        implements this pattern fully in a manner similar to that of
+        Hibernate.
+
+        .. seealso::
+
+            `Unit of Work by Martin Fowler <http://martinfowler.com/eaaCatalog/unitOfWork.html>`_
+
+            :ref:`sqla:session_toplevel`
 
     autocommit
-        A style of SQL execution in which each statement is
-        transparently wrapped in its own transaction.  Autocommit is
-        often used for interactive SQL command line prompts and it is
-        the default behavior of SQLAlchemy if no explicit transaction
-        is in effect.
+        This refers to a behavior whereby individual statements are
+        automatically committed to the database after execution, essentially
+        removing the need to explicitly demarcate the beginining and
+        end of a transactional block.   Autocommit is something that
+        can take place at many levels and in different ways; some databases
+        will start an interactive SQL session with autocommit implicitly
+        enabled, and others will not, requiring that the user invoke an
+        explicit ``COMMIT`` statement in order to commit any changes.
+
+        When using the Python :term:`DBAPI`, the ``connection`` object
+        provided by DBAPI is always non-autocommitting by default;
+        that is, the user must call ``connection.commit()`` in order
+        for the effect of any statements to be committed.   Some DBAPIs
+        offer "autocommit" options, but these are not standard.
+
+        SQLAlchemy's take on autocommit is that operations which involve
+        executing statements using the Core :class:`~sqla:sqlalchemy.engine.Engine`
+        or :class:`~sqla:sqlalchemy.engine.Connection`
+        objects are by default autocommitting, if the statement represents
+        one that modifies data - explicit transaction control is readily
+        available via the :meth:`~sqla:sqlalchemy.engine.Connection.begin`
+        method.  The rationale here is that the Core can be expediently
+        used in a "one-off" style for scripting without the need to
+        deal with transaction demarcation if not needed.
+
+        However, when using the ORM
+        :class:`~sqla:sqlalchemy.orm.session.Session` object, the default
+        in modern versions is that the :meth:`~sqla:sqlalchemy.orm.session.Session.commit`
+        method must be called in order to commit the ongoing transaction.
+        The rationale for this is so that the :term:`unit of work` pattern
+        can be used most effectively, where it can safely autoflush data
+        to the database automatically knowing that it's not implicitly
+        permanent, as well as that the explicit commit step provides
+        a clear boundary as to when the ORM-mapped objects should be
+        expired so that they can re-load their state from the database.
+        Ironically, the explicit commit pattern of the
+        :class:`~sqla:sqlalchemy.orm.session.Session` ultimately allows
+        for code that is *more* succinct than if autocommit were turned on,
+        as without it, it's often the case that flushing and expiration
+        must be handled manually.
 
     bind
         The association between a database and a SQLAlchemy component
@@ -952,13 +1129,6 @@ SQLAlchemy Core / Object Relational Terms
         An instance of a mapped class which has not been saved into a
         session or loaded from the database.
 
-
-    Unit of Work
-        The bundling together of all pending mapped instance creations,
-        modifications and deletions.  The workhorse behind an ORM session
-        flush, the Unit of Work translates un-flushed session activity
-        into a properly ordered series of INSERT, UPDATE and DELETE
-        statements.
 
     scalar
     scalar value
@@ -1092,60 +1262,150 @@ SQLAlchemy Core / Object Relational Terms
             :term:`joined table inheritance`
 
     many to many
-        An intermediary table modeling a many-to-many relationship.
-        Given:
+        A style of :func:`sqlalchemy.orm.relationship` which links two tables together
+        via an intermediary table in the middle.   Using this configuration,
+        any number of rows on the left side may refer to any number of
+        rows on the right, and vice versa.
+
+        A schema where employees can be associated with projects:
 
         .. sourcecode:: sql
 
-            CREATE TABLE cars (
-                car_id INTEGER PRIMARY KEY,
-                model VARCHAR(100) )
+            CREATE TABLE employee (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30)
+            )
 
-            CREATE TABLE colors (
-                color_id INTEGER PRIMARY KEY,
-                name VARCHAR(100) )
+            CREATE TABLE project (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30)
+            )
 
-        and the relationship "car models are available in multiple colors",
-        the relation can be modeled with a two-column table:
+            CREATE TABLE employee_project (
+                employee_id INTEGER PRIMARY KEY,
+                project_id INTEGER PRIMARY KEY,
+                FOREIGN KEY employee_id REFERENCES employee(id),
+                FOREIGN KEY project_id REFERENCES project(id)
+            )
 
-        .. sourcecode:: sql
+        Above, the ``employee_project`` table is the many-to-many table,
+        which naturally forms a composite primary key consisting
+        of the primary key from each related table.
 
-            CREATE TABLE car_colors (
-                car_id INTEGER REFERENCES cars (car_id),
-                color_id INTEGER REFERENCES colors (color_id),
-                PRIMARY KEY (car_id, color_id) )
+        In SQLAlchemy, the :func:`sqlalchemy.orm.relationship` function
+        can represent this style of relationship in a mostly
+        transparent fashion, where the many-to-many table is
+        specified using plain table metadata::
+
+            class Employee(Base):
+                __tablename__ = 'employee'
+
+                id = Column(Integer, primary_key)
+                name = Column(String(30))
+
+                projects = relationship(
+                    "Project",
+                    secondary=Table('employee_project', Base.metadata,
+                                Column("employee_id", Integer, ForeignKey('employee.id'),
+                                            primary_key=True),
+                                Column("project_id", Integer, ForeignKey('project.id'),
+                                            primary_key=True)
+                            ),
+                    backref="employees"
+                    )
+
+            class Project(Base):
+                __tablename__ = 'project'
+
+                id = Column(Integer, primary_key)
+                name = Column(String(30))
+
+        Above, the ``Employee.projects`` and back-referencing ``Project.employees``
+        collections are defined::
+
+            proj = Project(name="Client A")
+
+            emp1 = Employee(name="emp1")
+            emp2 = Employee(name="emp2")
+
+            proj.employees.extend([emp1, emp2])
 
         .. seealso::
 
-            :term:`association table`
+            :term:`association relationship`
 
-    association table
     association relationship
-        A :term:`relationship` between two tables that is further
-        qualified by information specific to each pair of linked rows:
+        A two-tiered :term:`relationship` which links two tables
+        together using an association table in the middle.  The
+        association relationship differs from a :term:`many to many`
+        relationship in that the many-to-many table is mapped
+        by a full class, rather than invisibly handled by the
+        :func:`sqlalchemy.orm.relationship` construct as in the case
+        with many-to-many, so that additional attributes are
+        explicitly available.
+
+        For example, if we wanted to associate employees with
+        projects, also storing the specific role for that employee
+        with the project, the relational schema might look like:
 
         .. sourcecode:: sql
 
-            CREATE TABLE cars (
-                car_id INTEGER PRIMARY KEY,
-                model VARCHAR(100) )
+            CREATE TABLE employee (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30)
+            )
 
-            CREATE TABLE colors (
-                color_id INTEGER PRIMARY KEY,
-                name VARCHAR(100) )
+            CREATE TABLE project (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30)
+            )
 
-        and the relationship "car models are available in multiple colors,
-        each for a limited time-span", the relation can be modeled with an
-        association table containing additional columns:
+            CREATE TABLE employee_project (
+                employee_id INTEGER PRIMARY KEY,
+                project_id INTEGER PRIMARY KEY,
+                role_name VARCHAR(30),
+                FOREIGN KEY employee_id REFERENCES employee(id),
+                FOREIGN KEY project_id REFERENCES project(id)
+            )
 
-        .. sourcecode:: sql
+        A SQLAlchemy declarative mapping for the above might look like::
 
-            CREATE TABLE car_colors (
-                car_id INTEGER REFERENCES cars (car_id),
-                color_id INTEGER REFERENCES colors (color_id),
-                available_starting DATE NOT NULL,
-                available_ending DATE NOT NULL,
-                PRIMARY KEY (car_id, color_id) )
+            class Employee(Base):
+                __tablename__ = 'employee'
+
+                id = Column(Integer, primary_key)
+                name = Column(String(30))
+
+
+            class Project(Base):
+                __tablename__ = 'project'
+
+                id = Column(Integer, primary_key)
+                name = Column(String(30))
+
+
+            class EmployeeProject(Base):
+                __tablename__ = 'employee_project'
+
+                employee_id = Column(Integer, ForeignKey('employee.id'), primary_key=True)
+                project_id = Column(Integer, ForeignKey('project.id'), primary_key=True)
+                role_name = Column(String(30))
+
+                project = relationship("Project", backref="project_employees")
+                employee = relationship("Employee", backref="employee_projects")
+
+
+        Employees can be added to a project given a role name::
+
+            proj = Project(name="Client A")
+
+            emp1 = Employee(name="emp1")
+            emp2 = Employee(name="emp2")
+
+            proj.project_employees.extend([
+                EmployeeProject(employee=emp1, role="tech lead"),
+                EmployeeProject(employee=emp2, role="account executive")
+            ])
 
         .. seealso::
 
@@ -1169,7 +1429,7 @@ SQLAlchemy Core / Object Relational Terms
         .. seealso::
 
             :ref:`sqla:unitofwork_contextual` - an in-depth
-            introduction to the :class:`.scoped_session` object.
+            introduction to the :class:`sqlalchemy.orm.scoped_session` object.
 
     selectable
         What relational algebra refers to as a relation, SQLAlchemy
