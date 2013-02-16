@@ -8,3 +8,4 @@ dist
 .venv
 .coverage
 .DS_Store
+*.db

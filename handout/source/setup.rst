@@ -38,7 +38,7 @@ Obtaining the Package
 
 The most recent version of this package is available using git::
 
-	git checkout https://zzzeek@bitbucket.org/zzzeek/pycon2013_student_package.git
+	git clone https://bitbucket.org/zzzeek/pycon2013_student_package.git
 
 Building the Documentation Handout
 ==================================
