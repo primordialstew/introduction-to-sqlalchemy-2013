@@ -47,12 +47,12 @@ The documentation can be built using standard Sphinx techniques.
 
 To build HTML on Linux / OSX::
 
-	cd handout/
+	cd handout
 	make html
 
 To build HTML on Windows::
 
-	cd handout/
+	cd handout
 	make html
 
 The documentation can also be built as PDF or any other format supported by Sphinx.   See the Sphinx documentation at http://sphinx-doc.org/ for further documentation.
@@ -71,12 +71,22 @@ Steps to install:
 
 	$ virtualenv --no-site-packages .venv
 
+This will create a directory ``.venv/bin`` which is where scripts are run.  On Windows, the directory is called ``.venv/Scripts``.
+
 2. Run the ``install.py`` script, which will install packages from the ``sw/``
-   directory into the local virtualenv::
+   directory into the local virtualenv.  On Linux/OSX::
 
 	$ .venv/bin/python install.py
 
-3. A particular tutorial script can be run using the ``sliderepl`` program::
+   On Windows::
+
+	$ .venv\Scripts\python.exe install.py
+
+3. A particular tutorial script can be run using the ``sliderepl`` program.
+   On Linux OSX::
 
 	$ .venv/bin/sliderepl 01_engine_usage.py
 
+   On Windows::
+
+	$ .venv\Scripts\sliderepl.exe 01_engine_usage.py
