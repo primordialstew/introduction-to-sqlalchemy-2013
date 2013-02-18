@@ -2,36 +2,41 @@
 Further Reading
 ===============
 
-Harrington, J. (2003) SQL Clearly Explained.  Morgan Kaufmann.
+Credit to Jason Kirtland for assembling this list.
 
-	Exactly what the title claims.
+* Celko, J. (2010) *SQL for Smarties.*  Morgan Kaufmann.
 
-Schmidt, B. (1999) Data Modeling for Information Professionals.  Prentice Hall PTR.
+  A sprawling book with many gems of SQL knowledge.  This book is now up to its fourth edition
+  and seems to have been modified quite a bit.
 
-	A fantastic resource for anyone in any profession who needs to think critically about information and its structure.
+* The SQL92 Standard
 
-Hay, D. (1996) Data Model Patterns, Conventions of Thought.  Dorset House.
+  Available as a .txt file from http://en.wikipedia.org/wiki/SQL-92
 
-Fowler, M. (1997) Analysis Patterns.  Addison-Wesley.
+* Harrington, J. (2003) *SQL Clearly Explained.*  Morgan Kaufmann.
 
-	Both books provide good schema advice and domain knowledge for classic topics such as accounting.
+  Exactly what the title claims.
 
-Nock, C. (2004) Data Access Patterns.  Addison-Wesley.
+* Schmidt, B. (1999) *Data Modeling for Information Professionals.*  Prentice Hall PTR.
 
-Fowler, M. (2002) Patterns of Enterprise Application Architecture.  Addison-Wesley Professional.
+  A fantastic resource for anyone in any profession who needs to think
+  critically about information and its structure.
 
-Schmidt, D., et al. (2000) Pattern-Oriented Software Architecture volume 2, Patterns for Concurrent and Networked Objects.  Wiley.
+* Nock, C. (2004) *Data Access Patterns.*  Addison-Wesley.
 
-	These three delve into the the mechanics of data access and strategies for concurrency.
+* Fowler, M. (2002) *Patterns of Enterprise Application Architecture.*  Addison-Wesley Professional.
 
-Celko, J. (2004)Trees and Hierarchies in SQL for Smarties.  Morgan Kaufmann.
+* Schmidt, D., et al. (2000) *Pattern-Oriented Software Architecture volume 2,
+  Patterns for Concurrent and Networked Objects.*  Wiley.
 
-	Covers many strategies for efficiently modeling trees and hierarchies
+  These three delve into the the mechanics of data access and strategies for concurrency.
+  *Patterns of Enterprise Application Architecture* was a primary inspiration
+  for the creation of SQLAlchemy itself.
 
-Celko, J. (2005) SQL for Smarties.  Morgan Kaufmann.
+* Hay, D. (1996) *Data Model Patterns, Conventions of Thought.*  Dorset House.
 
-	A sprawling book with many gems of SQL knowledge.
+* Fowler, M. (1997) *Analysis Patterns.*  Addison-Wesley.
 
-The SQL92 Standard
+  Both books provide good schema advice and domain knowledge for
+  classic topics such as accounting.
 
-	Available as a .txt file from http://en.wikipedia.org/wiki/SQL-92
