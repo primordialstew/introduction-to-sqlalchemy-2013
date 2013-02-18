@@ -409,6 +409,9 @@ Relational Terms
     rowset
         An ordered collection of row values, each of the same length and types.
 
+    scalar
+    scalar value
+        A single value, such as ``'a'``, ``123`` or ``'2008-02-01'``.
 
     normalization
         Database normalization is the process of organizing the fields
@@ -805,16 +808,6 @@ SQLAlchemy Core / Object Relational Terms
     orphan
         A mapped instance with a severed link to a collection or parent object.
 
-    pending
-        An instance which has been saved into a session but not yet persisted to the database.
-
-    persistent
-        An instance which is present in a session and in the database.
-
-    query
-        1. A SQL statement which is processed by a database to return results.
-        2. A SQLAlchemy ORM object which defines search criterion and returns mapped instances.
-
     threadlocal
         A shared data structure whose data members are visible only to
         the thread which set them. The concept of "thread local" in
@@ -830,22 +823,6 @@ SQLAlchemy Core / Object Relational Terms
         programatically at runtime by querying a live database's
         system tables for column and key definitions.
 
-
-    column
-        1. a database column, as defined within a CREATE TABLE
-        statement
-
-        2. a SQLAlchemy :class:`.Column` construct, which is a data
-        structure that stores information about the name of a database
-        column, its constraints, data type, and information on its
-        default value.
-
-    detached
-        An instance which is not present in any session, but whose
-        state information is present in the database. A detached
-        instance may have further pending changes on it which will
-        only be persisted if the instance is updated into a session
-        and then flushed.
 
     engine
         The primary facade for a database. An :class:`.Engine` manages a pool of
@@ -1101,165 +1078,192 @@ SQLAlchemy Core / Object Relational Terms
         must be handled manually.
 
     bind
-        The association between a database and a SQLAlchemy component
-        such as a table or ORM session.  Components which are bound
-        are linked to a single database and can act upon it
-        implicitly.  Unbound components can be used with any number of
-        databases but must explicitly combined: "act upon database
-        A, now act upon database B."
+        This term refers to the association of a connection-producing
+        object, usually an :term:`engine`, with a query-producing object, which in
+        modern usage is usually a :term:`session` object, and in
+        less common usage a :term:`metadata` object.
+
+        Most of SQLAlchemy's usage patterns involve dealing with
+        objects that produce SQL queries to be emitted to a database.
+        But it makes a distinction between these objects and objects
+        that represent actual database connections, or a source
+        of database connections.
+
+        For example, we can create an ORM
+        :class:`~sqlalchemy.orm.session.Session` object::
+
+            >>> from sqlalchemy.orm import Session
+            >>> session = Session()
+
+        But if we try to execute a query with it, we'd get an
+        error::
+
+            >>> session.scalar("select current_timestamp")
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in <module>
+              File "/Users/classic/dev/sqlalchemy/lib/sqlalchemy/orm/session.py", line 921, in scalar
+                clause, params=params, mapper=mapper, bind=bind, **kw).scalar()
+              File "/Users/classic/dev/sqlalchemy/lib/sqlalchemy/orm/session.py", line 912, in execute
+                bind = self.get_bind(mapper, clause=clause, **kw)
+              File "/Users/classic/dev/sqlalchemy/lib/sqlalchemy/orm/session.py", line 1083, in get_bind
+                ', '.join(context)))
+            sqlalchemy.exc.UnboundExecutionError: Could not locate a bind configured on SQL expression or this Session
+
+        This is because we haven't given this :class:`~sqlalchemy.orm.session.Session`
+        a source of connectivity.   We can make one using
+        :func:`~sqlalchemy.create_engine` and attaching it using ``.bind``::
+
+            >>> from sqlalchemy import create_engine
+            >>> engine = create_engine("sqlite://")
+            >>> session.bind = engine
+            >>> session.scalar("select current_timestamp")
+            u'2013-02-18 21:13:31'
+
+        Binding gets more elaborate than this, as a
+        :class:`~sqlalchemy.orm.session.Session` can be bound to multiple
+        databases at once; some use cases also involve binding
+        the session directly to an individual connection object, rather than to
+        an engine.   The practice of using binds with a Core :term:`metadata`
+        object is also something seen commonly, though we've tried to discourage
+        the use of this pattern as it tends to be overused and
+        misunderstood.
 
     cascade
-        The propagation of events from one mapped instance to another.
-        The cascade follows the path defined by relations between the
-        mappings. Cascaded events communicate session state. For example,
-        adding a lead instance to a session will add all associated
-        instances as well.
+        The propagation of particular lifecycle events from one mapped
+        instance to another, following along the paths formed
+        by :term:`relationships` between mappings.
+
+        An example of the most common cascade is the ``save-update``
+        cascade, which states that if an object is associated with a
+        parent, then that object should also be associated with the same
+        :term:`session` as that parent::
+
+            >>> from sqlalchemy.orm import Session
+            >>> session = Session()
+            >>> user_obj = User()
+            >>> session.add(user_obj)
+            >>> user_obj in session
+            True
+            >>> address_obj = Address()
+            >>> user_obj.addresses.append(address_obj)
+            >>> address_obj in session
+            True
+
+        Above, we associated an ``Address`` object with a
+        parent ``User`` object by appending it to the mapped
+        ``User.addresses`` collection.  As a result, that
+        ``Address`` object became associated with the same
+        :class:`~sqlalchemy.orm.session.Session` object
+        as that of the ``User``.
+
+        The behavior of cascades is customizable, but in most
+        cases the default cascade of ``save-update`` remains
+        in place.
+
+        There are two optional cascades known as ``delete``
+        and ``delete-orphan`` which are also very
+        prominent.   These cascades add on the behavior that the
+        child object should also be *deleted* when the parent
+        object is deleted, and additionally that the child object
+        should be deleted when detached from any parent.
+
+        The concept of configurable cascade behavior was part
+        of the SQLAlchemy ORM very early on and was inspired
+        by the same configurability in the Hibernate
+        ORM.
+
+        .. seealso::
+
+            :ref:`sqla:unitofwork_cascades`
+
+            :ref:`sqla:tutorial_delete_cascade`
+
 
     collection
-        In Python, a container class such as a list, set, or dict. In
-        SQLAlchemy relationships, the same, except the collection is
-        automatically filled with instances retrieved from the database.
+        In the SQLAlchemy ORM, this refers to a series of objects associated with
+        a parent object, using a :term:`relationship` to manage
+        these associations.   A collection corresponds to either a
+        :term:`one to many` or :term:`many to many` relationship,
+        and can be managed in Python by a variety of data types, the
+        most common being the Python ``list()``, but also including the
+        Python ``set()``, the Python ``dict()``, as well as any
+        user-defined type which corresponds to certain interfaces.
+
+        When starting out with the SQLAlchemy ORM, we generally stick
+        to plain lists and sets for collections.  Dictionaries
+        and custom-build collections are generally for more advanced
+        usage patterns.
+
+        .. seealso::
+
+            :ref:`sqla:collections_toplevel` - advanced collection
+            options.
 
     connection
-        An active link to a database. In SQLAlchemy, connections are
-        managed in a pool and idle connections are reused for new
-        tasks.  An active connection has a transactional state.
+        Refers to an active database handle.  The term "connection"
+        can refer to different specific constructs; the most fundamental
+        is the "connection" object provided by the Python :term:`DBAPI`.
+        In SQLAlchemy, the DBAPI connection is normally maintained
+        transparently behind a
+        :term:`facade` known as the :class:`~sqlalchemy.engine.Connection`
+        object.  This object is obtained from a :term:`engine` object,
+        and has a one-to-one correspondence with a DBAPI connection.
 
     transient
-        An instance of a mapped class which has not been saved into a
-        session or loaded from the database.
-
-
-    scalar
-    scalar value
-        A single value, such as ``'a'``, ``123`` or ``'2008-02-01'``.
-
-    single table inheritance
-        Columns for all classes in an inheritance hierarchy are stored
-        in a single table. A discriminator column indicates which
-        class a given row represents.  Columns not needed by a
-        particular class are left empty.
-
-        E.g.::
-
-
-            id | type  | amount |    date    | cnum | expiry_year | expiry_mon
-           ----+-------+--------+------------+------+-------------+------------
-             1 | check | 100.00 | 2008-02-01 |   12 |             |
-             2 | ccard |  50.75 | 2008-02-02 |      |        2010 |          2
+        This describes one of the four major object states which
+        an object can have within a :term:`session`; a transient object
+        is a new object that doesn't have any database identity
+        and has not been associated with a session yet.  When the
+        object is added to the session, it moves to the
+        :term:`pending` state.
 
         .. seealso::
 
-           :term:`joined table inheritance`
+            :ref:`sqla:session_object_states`
 
-           :term:`concrete table inheritance`
-
-    joined table inheritance
-        Columns for classes in an inheritance hierarchy are stored in one
-        table per class. The tables are joined together to represent an
-        instance columns for the instance's types are combined with
-        columns of its super class and so on. The primary key of the base
-        class in the hierarchy is shared among all of class tables.  The
-        base class table also contains a discriminator column to identify
-        the type of any given row.
-
-        .. sourcecode:: sql
-
-            CREATE TABLE payment (
-                id SERIAL PRIMARY KEY,
-                type VARCHAR(16) NOT NULL,
-                amount NUMERIC(10,2),
-                "date" DATE )
-
-            CREATE TABLE check_payment (
-                id INTEGER PRIMARY KEY REFERENCES payment (id),
-                cnum INTEGER )
-
-            CREATE TABLE ccard_payment (
-                id INTEGER PRIMARY KEY REFERENCES payment (id),
-                expiry_year INTEGER,
-                expiry_mon INTEGER )
-
-            INSERT INTO payment (type, amount, "date")
-                VALUES ('check', 100.0, '2008-02-01')
-
-            INSERT INTO check_payment VALUES (1, 12)
-
-            INSERT INTO payment (type, amount, "date")
-                VALUES ('ccard', 50.75, '2008-02-02')
-
-            INSERT INTO ccard_payment VALUES (2, 2010, 2)
-
-            SELECT * FROM payment
-                NATURAL LEFT JOIN check_payment
-                NATURAL LEFT JOIN ccard_payment
-
-             id | type  | amount |    date    | cnum | expiry_year | expiry_mon
-            ----+-------+--------+------------+------+-------------+------------
-              1 | check | 100.00 | 2008-02-01 |   12 |             |
-              2 | ccard |  50.75 | 2008-02-02 |      |        2010 |          2
-
-            SELECT * FROM payment NATURAL JOIN check_payment WHERE type='check'
-
-             id | type  | amount |    date    | cnum
-            ----+-------+--------+------------+------
-              1 | check | 100.00 | 2008-02-01 |   12
-
-            SELECT * FROM payment NATURAL JOIN ccard_payment WHERE type='ccard'
-
-             id | type  | amount |    date    | expiry_year | expiry_mon
-            ----+-------+--------+------------+-------------+------------
-              2 | ccard |  50.75 | 2008-02-02 |        2010 |          2
+    pending
+        This describes one of the four major object states which
+        an object can have within a :term:`session`; a pending object
+        is a new object that doesn't have any database identity,
+        but has been recently associated with a session.   When
+        the session emits a flush and the row is inserted, the
+        object moves to the :term:`persistent` state.
 
         .. seealso::
 
-            :term:`single table inheritance`
+            :ref:`sqla:session_object_states`
 
-            :term:`concrete table inheritance`
-
-    concrete table inheritance
-        Columns for classes in an inheritance hierarchy are stored in
-        one table per class.  Each table contains the full set of
-        columns used by its class, and primary key values are not
-        unique among tables.  The tables are fully independent.
-
-        .. sourcecode:: sql
-
-            CREATE TABLE check_payment (
-                id SERIAL PRIMARY KEY,
-                amount NUMERIC(10,2),
-                "date" DATE,  cnum INTEGER )
-
-            CREATE TABLE ccard_payment (
-                id SERIAL PRIMARY KEY,
-                amount NUMERIC(10,2),
-                "date" DATE,
-                expiry_year INTEGER,
-                expiry_mon INTEGER )
-
-            INSERT INTO check_payment (amount, "date", cnum)
-                VALUES (100.0, '2008-02-01', 12)
-
-            INSERT INTO ccard_payment (amount, "date", expiry_year, expiry_mon)
-                VALUES (50.75, '2008-02-02', 2010, 2)
-
-            SELECT * FROM check_payment
-
-             id | amount |    date    | cnum
-            ----+--------+------------+------
-              1 | 100.00 | 2008-02-01 |   12
-
-            SELECT * FROM ccard_payment
-
-             id | amount |    date    | expiry_year | expiry_mon
-            ----+--------+------------+-------------+------------
-              1 |  50.75 | 2008-02-02 |        2010 |          2
+    persistent
+        This describes one of the four major object states which
+        an object can have within a :term:`session`; a persistent object
+        is an object that has a database identity (i.e. a primary key)
+        and is currently associated with a session.   Any object
+        that was previously :term:`pending` and has now been inserted
+        moves into the persistent state, as is any object that's
+        been loaded by the session from the database.   When a
+        persistent object is removed from a session, it is known
+        as :term:`detached`.
 
         .. seealso::
 
-            :term:`single table inheritance`
+            :ref:`sqla:session_object_states`
 
-            :term:`joined table inheritance`
+    detached
+        This describes one of the four major object states which
+        an object can have within a :term:`session`; a detached object
+        is an object that has a database identity (i.e. a primary key)
+        but is not associated with any session.  An object that
+        was previously :term:`persistent` and was removed from its
+        session either because it was expunged, or the owning
+        session was closed, moves into the detached state.
+        The detached state is generally used when objects are being
+        moved between sessions or when being moved to/from an external
+        object cache.
+
+        .. seealso::
+
+            :ref:`sqla:session_object_states`
+
 
     many to many
         A style of :func:`sqlalchemy.orm.relationship` which links two tables together
