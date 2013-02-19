@@ -31,7 +31,7 @@ Credit to Jason Kirtland for assembling this list.
 
   These three delve into the the mechanics of data access and strategies for concurrency.
   *Patterns of Enterprise Application Architecture* was a primary inspiration
-  for the creation of SQLAlchemy itself.
+  for the creation of SQLAlchemy itself.  The blog post `Patterns Implemented by SQLAlchemy <http://techspot.zzzeek.org/2012/02/07/patterns-implemented-by-sqlalchemy/>`_ details this.
 
 * Hay, D. (1996) *Data Model Patterns, Conventions of Thought.*  Dorset House.
 

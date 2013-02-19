@@ -173,6 +173,7 @@ Relational Terms
             http://en.wikipedia.org/wiki/Consistency_(database_systems)
 
     isolation
+    isolated
         The isolation property of the :term:`ACID` model
         ensures that the concurrent execution
         of transactions results in a system state that would be
@@ -825,6 +826,33 @@ SQLAlchemy Core / Object Relational Terms
 
 
     engine
+        An object that provides a source of database connectivity.  The
+        :class:`~sqlalchemy.engine.Engine` object maintains a :term:`connection pool`,
+        which keeps track of a series of :term:`DBAPI` connection objects,
+        as well as a :term:`dialect`, which keeps track of all the information known
+        about the particular kind of database and Python driver being used
+        by this particular engine.  An :class:`~sqlalchemy.engine.Engine`
+        is created using the :func:`~sqlalchemy.create_engine`
+        factory function, and a database connection can be requested
+        from the :class:`~sqlalchemy.engine.Engine` using the
+        :meth:`~sqlalchemy.engine.Engine.connect` method::
+
+            >>> from sqlalchemy import create_engine
+            >>> engine = create_engine("postgresql://scott:tiger@localhost/test")
+            >>> connection = engine.connect()
+            >>> connection.scalar("SELECT now()")
+            datetime.datetime(2013, 2, 18, 18, 26, 37)
+            >>> connection.close()
+
+        While the above pattern illustrates a literal, rudimentary use of
+        :class:`~sqlalchemy.engine.Engine`, it's normally used in a more
+        abstracted way than the above.  When dealing with the SQLAlchemy
+        ORM, the :class:`~sqlalchemy.engine.Engine` is usually :term:`bound`
+        to an ORM :term:`session` object when the program starts,
+        where it then remains hidden as a source of connectivity for that
+        session.
+
+
         The primary facade for a database. An :class:`.Engine` manages a pool of
         database connections and provides methods to execute SQL
         statements and fetch result sets.
@@ -835,49 +863,116 @@ SQLAlchemy Core / Object Relational Terms
 
             :ref:`sqla:connections_toplevel`
 
-    explicit execution
-        Applying a SQLAlchemy action or statement to a specific database
-        or connection.
-
     flush
-        The operation by which a :class:`.Session` assembles all pending
-        changes in memory to a set of objects, and emits INSERT, UPDATE
-        and DELETE statements to the current database connection in order
-        to synchronize those changes with the database.
+        The operation by which a :term:`session` emits INSERT, UPDATE
+        and DELETE statements to the database in response to the accumulation
+        of a series of in-memory changes to objects.  The flush
+        operation is a key component of the :term:`unit of work` pattern,
+        and is normally invoked before the :class:`~sqlalchemy.orm.session.Session`
+        emits a new SELECT statement, as well as right before the
+        :class:`~sqlalchemy.orm.session.Session` commits a transaction.
 
-        The flush is a key component of the :term:`unit of work`
-        object relational pattern.
+        .. seealso::
+
+            :ref:`sqla:session_flushing`
+
 
     identity map
-        A per-session, one-to-one mapping between Python instances and
-        database identity.  Ensures that only one mapped instance
-        exists at a time, no matter how how it is queried or
-        associated.
+        A mapping between Python objects and their database identities.
+        The identity map is a collection that's associated with an
+        ORM :term:`session` object, and maintains a single instance
+        of every database object keyed to its identity.   The advantage
+        to this pattern is that all operations which occur for a particular
+        database identity are transparently coordinated onto a single
+        object instance.  When using an identity map in conjunction with
+        an :term:`isolated` transaction, having a reference
+        to an object that's known to have a particular primary key is
+        synonymous with referring to the corresponding row in the database
+        directly.
 
-    implicit execution
-        Application of a bound SQLAlchemy action or statement, affects the
-        database specified in the bind. Provides a lightweight syntax when
-        only a single database is required.
+        .. seealso::
+
+            `Identity Map <http://martinfowler.com/eaaCatalog/identityMap.html>`_
+
 
     instance
-        The result of calling a Python class constructor; a single, unique
-        Python object.
+        Refers to an instantiated object, that is, the result of calling
+        the constructor of a Python class.
+
+        We use this term to be specific that we are dealing with a stateful
+        Python object, rather than the class.  Such as if we have a class
+        called ``User`` as below::
+
+            class User(object):
+                def __init__(self, name):
+                    self.name = name
+
+        The above Python code represents only the :term:`class` ``User``,
+        and not an actual instance.  The instance refers to when we construct
+        a ``User``, and in this case assign to it a ``.name`` :term:`attribute`::
+
+            my_user = User('some user')
+
+        The SQLAlchemy ORM deals heavily with user-defined classes and instances
+        of those classes; therefore throughout its documentation as well
+        as its source code, it's important that we keep straight
+        whether we're dealing with a class or an instance of one.
+
 
     instrumentation
-        The injection of an observer into a method or attribute.
-        SQLAlchemy uses instrumentation to detect changes made to managed
-        attributes and track changes in collection membership. Changes
-        raise events which can cascade to related instances.
+    instrumented
+        Instrumentation refers to the process of augmenting the functionality
+        and attribute set of a particular class.   Ideally, the
+        behavior of the class should remain close to a regular
+        class, except that additional behviors and features are
+        made available.  The SQLAlchemy :term:`mapping` process,
+        among other things, adds database-enabled :term:`descriptors`
+        to a mapped
+        class which each represent a particular database column
+        or relationship to a related class.
 
+    declarative
+        An API included with the SQLAlchemy ORM that in modern usage
+        serves as the primary system used to configure the ORM.
+        The central idea of the declarative system is that one
+        defines a class to be :term:`mapped`, and then applies to
+        this class a series of directives which denote the :term:`table metadata`
+        to be associated with this class, which establishes the table(s)
+        and columns that this class will be associated with when the
+        ORM performs queries.
+
+        The declarative system provides a relatively concise
+        and very extensible series of patterns allowing not
+        just for basic class mapping, but also allowing
+        the construction of repeatable
+        and composable mapping patterns using custom base classes,
+        abstract classes, and mixins.
+
+        .. seealso::
+
+            :ref:`ormtutorial_toplevel`
+
+            :ref:`declarative_toplevel`
+
+    mapped
     mapper
-        An object which translates database rows to and from instances
-        of a class.  Mappers define which columns will be translated
-        to object attributes, and how foreign key relationships will
-        be translated to collection-holding attributes.  A mapper
-        installs instrumentation on the Python class to manage mapped
-        attributes.
+    mapping
+        We say a class is "mapped" when it has been passed through the
+        :func:`sqlalchemy.orm.mapper` function.   This process associates the
+        class with a database table or other :term:`selectable`
+        construct, so that instances of it can be persisted
+        and loaded using a :term:`session` object.
 
-    MetaData
+        Modern usage of the SQLAlchemy ORM typically "maps" classes using
+        the :term:`declarative` system, which provides a relatively concise
+        and very extensible series of patterns allowing classes to be
+        mapped.  The declarative system actually rides on top of the so-called
+        :ref:`sqla:classical_mapping` system, which is more
+        fundamental and less automated.   Early versions of SQLAlchemy
+        only featured the classical mapping system.
+
+    metadata
+    table metadata
         A collection of related :class:`.Table` objects.  These objects
         collected together may define :class:`.ForeignKey` objects which refer
         to other tables as dependencies.   The full collection of tables can
@@ -940,15 +1035,7 @@ SQLAlchemy Core / Object Relational Terms
 
         When used at the instance level, these descriptors help to keep
         track of changes to values, and also :term:`lazy load` unloaded values
-        and collections from the database when the attribute is accessed::
-
-            >>> m1 = MyClass()
-            >>> m1.id = 5
-            >>> m1.data = "some data"
-
-            >>> from sqlalchemy import inspect
-            >>> inspect(m1).attrs.data.history.added
-            "some data"
+        and collections from the database when the attribute is accessed.
 
     instrumentation
     instrumented
@@ -1012,10 +1099,10 @@ SQLAlchemy Core / Object Relational Terms
         classes which service a specific DBAPI on top of a
         specific database engine; for example, the :func:`.create_engine`
         URL ``postgresql+psycopg2://@localhost/test``
-        refers to the :mod:`psycopg2 <.postgresql.psycopg2>`
+        refers to the :mod:`psycopg2 <sqlalchemy.dialects.postgresql.psycopg2>`
         DBAPI/dialect combination, whereas the URL ``mysql+mysqldb://@localhost/test``
-        refers to the :mod:`MySQL for Python <.mysql.mysqldb>`
-        DBAPI DBAPI/dialect combination.
+        refers to the :mod:`MySQL for Python <sqlalchemy.dialects.mysql.mysqldb>`
+        DBAPI/dialect combination.
 
         .. seealso::
 
@@ -1055,7 +1142,8 @@ SQLAlchemy Core / Object Relational Terms
         executing statements using the Core :class:`~sqla:sqlalchemy.engine.Engine`
         or :class:`~sqla:sqlalchemy.engine.Connection`
         objects are by default autocommitting, if the statement represents
-        one that modifies data - explicit transaction control is readily
+        one that modifies data.  If one wants to control the scope of these
+        transactions explicitly, this control is readily
         available via the :meth:`~sqla:sqlalchemy.engine.Connection.begin`
         method.  The rationale here is that the Core can be expediently
         used in a "one-off" style for scripting without the need to
@@ -1078,6 +1166,7 @@ SQLAlchemy Core / Object Relational Terms
         must be handled manually.
 
     bind
+    bound
         This term refers to the association of a connection-producing
         object, usually an :term:`engine`, with a query-producing object, which in
         modern usage is usually a :term:`session` object, and in
@@ -1208,6 +1297,54 @@ SQLAlchemy Core / Object Relational Terms
         :term:`facade` known as the :class:`~sqlalchemy.engine.Connection`
         object.  This object is obtained from a :term:`engine` object,
         and has a one-to-one correspondence with a DBAPI connection.
+
+        .. seealso::
+
+            :ref:`sqla:engines_toplevel`
+
+            :ref:`sqla:connections_toplevel`
+
+    connection pool
+        An object that maintains a series of :term:`connection` objects persistently
+        in memory, allowing individual connections to be *checked out* by a particular
+        application function, used for some period of time, and then *checked in*
+        to the pool when usage of the connection is complete.
+
+        The usage of connection pools in SQLAlchemy has two primary purposes:
+
+        1. To reduce the latency involved in acquiring a database connection.
+           By maintaining a series of connections in memory, the overhead of
+           the TCP/IP connection as well as the initial negotiation of the
+           client :term:`DBAPI` library with the backend database is incurred
+           only a limited number of times, rather than for all distinct usages
+           of a connection.
+
+        2. To place a limit on the number of database connections a single
+           Python process can use at once.  SQLAlchemy's default connection pool
+           allows the specification of a *pool size* as well as *max overflow*
+           parameters; the size indicates the largest number of connections
+           that should be held in memory persistently, and the max overflow indicates
+           an optional additional number of connections that may be temporarily
+           procured on top of the base size.
+
+        The SQLAlchemy :term:`engine` object maintains a reference to a connection
+        pool where it retrieves and stores DBAPI connections - in most cases this
+        pool is an instance of :class:`sqlalchemy.pool.QueuePool`.   Connection
+        pooling can be disabled for a particular engine by replacing the pool
+        implementation with the so-called :class:`sqlalchemy.pool.NullPool`,
+        which has the same interface as a pool but doesn't actually maintain
+        connections persistently.
+
+        Note that SQLAlchemy's built-in pooling is only one style of pooling,
+        known as *application level pooling*.  An architecture can also use
+        *pool middleware*, that is, a server that runs separately and mediates
+        connectivity between one or more applications and a database backend.
+        The `PgBouncer <http://wiki.postgresql.org/wiki/PgBouncer>`_ product
+        is one such middleware service designed for usage with Postgresql.
+
+        .. seealso::
+
+            :ref:`pooling_toplevel`
 
     transient
         This describes one of the four major object states which
@@ -1417,6 +1554,7 @@ SQLAlchemy Core / Object Relational Terms
 
 
     relationship
+    relationships
         In SQLAlchemy, the junction of two mapped classes, or of a
         mapped class to itself.  The relationship usually corresponds
         to a foreign key relationship between two tables or
