@@ -25,19 +25,15 @@ e.execute("""insert into employee(emp_name) values ('jack')""")
 e.execute("""insert into employee(emp_name) values ('fred')""")
 
 ### slide::
-# Connecting to a database starts with the create_engine() function.
-# this creates an Engine object which will serve as "home base" for
-# new connections to the database.  It is not a connection itself,
-# and in fact the Engine doesn't make any connection to the database
-# until it is first used.
+# create_engine() builds a *factory* for database connections.
 
 from sqlalchemy import create_engine
 
 engine = create_engine("sqlite:///some.db")
 
 ### slide:: p
-# Engine features an execute() method which will make it's first connection
-# to the database and run a query for us.
+# Engine features an *execute()* method that will run a query on
+# a connection for us.
 
 result = engine.execute(
              "select emp_id, emp_name from "
@@ -58,14 +54,12 @@ row
 row['emp_name']
 
 ### slide::
-# the result object closes itself automatically when all rows are exhausted,
-# but we can also close it explicitly.   Only when the result is closed
-# are the database connection resources obtained by Engine.execute() released.
+# results close automatically when all rows are exhausted, but we can
+# also close explicitly.
 result.close()
 
 ### slide:: p
-# the result object from a SELECT is also a Python iterable,
-# so we usually don't need to call fetchone()...
+# result objects can also be iterated
 
 result = engine.execute("select * from employee")
 for row in result:
@@ -85,9 +79,7 @@ engine.execute("insert into employee_of_month (emp_name) values (:emp_name)",
                     emp_name='fred')
 
 ### slide:: p
-# for more control over when the engine connects and disconnects,
-# we can establish a *Connection*, using the connect() method.
-# Here, we close() the connection to release resources.
+# We can control the scope of connection using connect().
 
 conn = engine.connect()
 result = conn.execute("select * from employee")
@@ -106,9 +98,7 @@ trans.commit()
 conn.close()
 
 ### slide:: p
-# A shortcut for running statements in a transaction is to use
-# the engine.begin() context manager.   Connection resources are closed
-# automatically and the transaction handled.
+# a context manager is supplied to streamline this process.
 
 with engine.begin() as conn:
     conn.execute("insert into employee (emp_name) values (:emp_name)", emp_name="mary")
@@ -116,5 +106,19 @@ with engine.begin() as conn:
 
 
 ### slide::
+# Exercise: Assuming this table:
+#
+#     CREATE TABLE employee (
+#         emp_id INTEGER PRIMARY KEY,
+#         emp_name VARCHAR(30)
+#     }
+#
+# And using the "engine.execute()" method to invoke a statement:
+#
+# 1. Execute an INSERT statement that will insert the row with emp_name='dilbert'.
+#    The primary key column can be omitted so that it is generated automatically.
+#
+# 2. SELECT all rows from the employee table.
+#
 
-
+### slide::
