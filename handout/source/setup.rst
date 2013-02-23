@@ -86,28 +86,27 @@ Steps to install:
 
 2. Create a local virtualenv_::
 
-	$ virtualenv --no-site-packages .venv
+	     $ virtualenv --no-site-packages .venv
 
-This will create a directory ``.venv/bin`` which is where scripts are run.  On Windows, the directory is called ``.venv/Scripts``.
+   This will create a directory ``.venv/bin`` which is where scripts are run.  On Windows, the directory is called ``.venv/Scripts``.
 
 3. Run the ``install.py`` script, which will install packages from the ``sw/``
    directory into the local virtualenv_.  On Linux/OSX::
 
-	$ .venv/bin/python install.py
+	     $ .venv/bin/python install.py
 
    On Windows::
 
-	$ .venv\Scripts\python.exe install.py
+	     $ .venv\Scripts\python.exe install.py
 
 4. A particular tutorial script can be run using the ``sliderepl`` program.
    On Linux OSX::
 
-	$ .venv/bin/sliderepl 01_engine_usage.py
+	     $ .venv/bin/sliderepl 01_engine_usage.py
 
    On Windows::
 
-	$ .venv\Scripts\sliderepl.exe 01_engine_usage.py
-
+	     $ .venv\Scripts\sliderepl.exe 01_engine_usage.py
 
 .. _Sphinx: http://sphinx-doc.org/
 

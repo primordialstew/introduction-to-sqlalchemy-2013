@@ -686,7 +686,8 @@ Relational Terms
         .. sourcecode:: sql
 
             SELECT email_address.email FROM email_address
-            WHERE email_address.user_account_id=(SELECT id FROM user_account WHERE name='jack')
+            WHERE email_address.user_account_id=
+                (SELECT id FROM user_account WHERE name='jack')
 
                 email
             ---------------
@@ -770,7 +771,8 @@ Relational Terms
 
             SELECT name FROM user_account
              WHERE EXISTS
-             (SELECT * FROM email_address WHERE email_address.user_account_id=user_account.id)
+             (SELECT * FROM email_address
+                WHERE email_address.user_account_id=user_account.id)
 
              name
             -------
@@ -1196,7 +1198,8 @@ SQLAlchemy Core / Object Relational Terms
                 bind = self.get_bind(mapper, clause=clause, **kw)
               File "/Users/classic/dev/sqlalchemy/lib/sqlalchemy/orm/session.py", line 1083, in get_bind
                 ', '.join(context)))
-            sqlalchemy.exc.UnboundExecutionError: Could not locate a bind configured on SQL expression or this Session
+            sqlalchemy.exc.UnboundExecutionError: Could not
+                locate a bind configured on SQL expression or this Session
 
         This is because we haven't given this :class:`~sqlalchemy.orm.session.Session`
         a source of connectivity.   We can make one using

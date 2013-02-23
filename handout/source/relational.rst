@@ -449,57 +449,57 @@ We'll analyze what a ``SELECT`` statement like the following does in a logical s
    retrieve rows from is resolved; in this case, we start with the set of all rows
    contained in the ``employee`` table:
 
-.. sourcecode:: sql
+    .. sourcecode:: sql
 
-        ... FROM employee ...
+            ... FROM employee ...
 
-        emp_id    emp_name     dep_id
-        -------+------------+----------
-          1    |   wally    |     1
-          2    |   dilbert  |     1
-          3    |   jack     |     2
-          4    |   ed       |     3
-          5    |   wendy    |     1
-          6    |   dogbert  |     4
-          7    |   boss     |     3
+            emp_id    emp_name     dep_id
+            -------+------------+----------
+              1    |   wally    |     1
+              2    |   dilbert  |     1
+              3    |   jack     |     2
+              4    |   ed       |     3
+              5    |   wendy    |     1
+              6    |   dogbert  |     4
+              7    |   boss     |     3
 
 2. For the set of all rows in the ``employee`` table, each row is tested against the
    criteria specified in the ``WHERE`` clause.  Only those rows which evaluate to "true"
    based on this expression are returned.  We now have a subset of rows retrieved
    from the ``employee`` table:
 
-.. sourcecode:: sql
+    .. sourcecode:: sql
 
-        ... WHERE dep_id=1 OR dep_id=3 OR dep_id=4 ...
+            ... WHERE dep_id=1 OR dep_id=3 OR dep_id=4 ...
 
-        emp_id    emp_name     dep_id
-        -------+------------+----------
-          1    |   wally    |     1
-          2    |   dilbert  |     1
-          4    |   ed       |     3
-          5    |   wendy    |     1
-          6    |   dogbert  |     4
-          7    |   boss     |     3
+            emp_id    emp_name     dep_id
+            -------+------------+----------
+              1    |   wally    |     1
+              2    |   dilbert  |     1
+              4    |   ed       |     3
+              5    |   wendy    |     1
+              6    |   dogbert  |     4
+              7    |   boss     |     3
 
 3. With the target set of rows assembled, ``GROUP BY`` then organizes the rows into groups,
    based on the criterion given.  Here we illustrate an "intermediary" result set which
    we would not actually see as a result, but instead indicates the
    data that's to be passed on to the next step:
 
-.. sourcecode:: sql
+    .. sourcecode:: sql
 
-        ... GROUP BY dep_id ...
+            ... GROUP BY dep_id ...
 
-         "group"    emp_id    emp_name     dep_id
-        ----------+---------+------------+---------
-        dep_id=1  |    1    |   wally    |     1
-                  |    2    |   dilbert  |     1
-                  |    5    |   wendy    |     1
-        ----------+---------+------------+---------
-        dep_id=3  |    4    |   ed       |     3
-                  |    7    |   boss     |     3
-        ----------+---------+------------+---------
-        dep_id=4  |    6    |   dogbert  |     4
+             "group"    emp_id    emp_name     dep_id
+            ----------+---------+------------+---------
+            dep_id=1  |    1    |   wally    |     1
+                      |    2    |   dilbert  |     1
+                      |    5    |   wendy    |     1
+            ----------+---------+------------+---------
+            dep_id=3  |    4    |   ed       |     3
+                      |    7    |   boss     |     3
+            ----------+---------+------------+---------
+            dep_id=4  |    6    |   dogbert  |     4
 
 4. Aggregate functions are now applied to each group.   We've passed
    emp_id to the ``count()`` function, which means for group "1" it will
@@ -513,31 +513,31 @@ We'll analyze what a ``SELECT`` statement like the following does in a logical s
    column expression here.  Below, we observe that the "emp_id" and
    "emp_name" columns go away, as we've aggregated on the count:
 
-.. sourcecode:: sql
+    .. sourcecode:: sql
 
-        ... count(emp_id) AS emp_count ...
+            ... count(emp_id) AS emp_count ...
 
-          emp_count     dep_id
-        ------------+-----------
-             3      |    1
-        ------------+-----------
-             2      |    3
-        ------------+-----------
-             1      |    4
+              emp_count     dep_id
+            ------------+-----------
+                 3      |    1
+            ------------+-----------
+                 2      |    3
+            ------------+-----------
+                 1      |    4
 
 5. Almost through all of our keywords, ``HAVING`` takes effect once we have the aggregations,
    and acts like a ``WHERE`` clause for aggregate values.   In our statement, it filters
    out groups that don't have more than one member:
 
-.. sourcecode:: sql
+    .. sourcecode:: sql
 
-        ... HAVING emp_count > 1 ...
+            ... HAVING emp_count > 1 ...
 
-          emp_count     dep_id
-        ------------+-----------
-             3      |    1
-        ------------+-----------
-             2      |    3
+              emp_count     dep_id
+            ------------+-----------
+                 3      |    1
+            ------------+-----------
+                 2      |    3
 
 
 6. Finally, ``ORDER BY`` is applied last.   It's important to remember in SQL that
@@ -546,15 +546,15 @@ We'll analyze what a ``SELECT`` statement like the following does in a logical s
    our data are done before any ordering is applied, and only right before
    the final results are returned to us are they ordered:
 
-.. sourcecode:: sql
+    .. sourcecode:: sql
 
-        ... ORDER BY emp_count, dep_id
+            ... ORDER BY emp_count, dep_id
 
-          emp_count     dep_id
-        ------------+-----------
-             2      |    3
-        ------------+-----------
-             3      |    1
+              emp_count     dep_id
+            ------------+-----------
+                 2      |    3
+            ------------+-----------
+                 3      |    1
 
 .. _acid_model:
 
