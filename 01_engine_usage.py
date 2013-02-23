@@ -1,4 +1,4 @@
-### slide:: -*- init -*-
+### slide:: s
 
 from sqlalchemy import create_engine
 import os
@@ -35,13 +35,13 @@ from sqlalchemy import create_engine
 
 engine = create_engine("sqlite:///some.db")
 
-### slide::
+### slide:: p
 # Engine features an execute() method which will make it's first connection
-# to the database and run a query for us.   
+# to the database and run a query for us.
 
 result = engine.execute(
              "select emp_id, emp_name from "
-             "employee where emp_id=:emp_id", 
+             "employee where emp_id=:emp_id",
              emp_id=3)
 
 ### slide::
@@ -49,9 +49,11 @@ result = engine.execute(
 # fetchall()
 row = result.fetchone()
 
+### slide:: i
 # the row looks like a tuple
 row
 
+### slide:: i
 # but also acts like a dictionary
 row['emp_name']
 
@@ -61,7 +63,7 @@ row['emp_name']
 # are the database connection resources obtained by Engine.execute() released.
 result.close()
 
-### slide::
+### slide:: p
 # the result object from a SELECT is also a Python iterable,
 # so we usually don't need to call fetchone()...
 
@@ -69,20 +71,20 @@ result = engine.execute("select * from employee")
 for row in result:
     print row
 
-### slide::
+### slide:: p
 # the fetchall() method is a shortcut to producing a list
 # of all rows.
 result = engine.execute("select * from employee")
 print result.fetchall()
 
-### slide::
-# The execute() method of Engine will *autocommit* 
+### slide:: p
+# The execute() method of Engine will *autocommit*
 # statements like INSERT by default.
 
-engine.execute("insert into employee_of_month (emp_name) values (:emp_name)", 
+engine.execute("insert into employee_of_month (emp_name) values (:emp_name)",
                     emp_name='fred')
 
-### slide::
+### slide:: p
 # for more control over when the engine connects and disconnects,
 # we can establish a *Connection*, using the connect() method.
 # Here, we close() the connection to release resources.
@@ -92,9 +94,9 @@ result = conn.execute("select * from employee")
 result.fetchall()
 conn.close()
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # to run several statements inside a transaction, Connection
-# features a begin() method that returns a Transaction.  
+# features a begin() method that returns a Transaction.
 
 conn = engine.connect()
 trans = conn.begin()
@@ -103,7 +105,7 @@ conn.execute("update employee_of_month set emp_name = :emp_name", emp_name="wend
 trans.commit()
 conn.close()
 
-### slide::
+### slide:: p
 # A shortcut for running statements in a transaction is to use
 # the engine.begin() context manager.   Connection resources are closed
 # automatically and the transaction handled.
