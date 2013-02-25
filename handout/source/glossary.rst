@@ -1606,6 +1606,12 @@ SQLAlchemy Core / Object Relational Terms
 
             :term:`association relationship`
 
+            :term:`relationship`
+
+            :term:`one to many`
+
+            :term:`many to one`
+
     association relationship
         A two-tiered :term:`relationship` which links two tables
         together using an association table in the middle.  The

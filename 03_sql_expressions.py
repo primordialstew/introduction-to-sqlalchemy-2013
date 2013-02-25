@@ -3,14 +3,14 @@
 from sqlalchemy import MetaData, Table, Column, String, Integer
 
 metadata = MetaData()
-user_table = Table('user', metadata, 
+user_table = Table('user', metadata,
             Column('id', Integer, primary_key=True),
             Column('username', String(50)),
             Column('fullname', String(50))
-)
+    )
 
-### slide:: -*- no_exec -*-
-# Then we'll create a new SQLite database and generate the table.
+### slide:: p
+# new SQLite database and generate the table.
 
 from sqlalchemy import create_engine
 engine = create_engine("sqlite://")
@@ -22,209 +22,189 @@ metadata.create_all(engine)
 
 user_table.c.username
 
+### slide::
+# Column is part of a class known as "ColumnElement",
+# which exhibit custom Python expression behavior.
+
+user_table.c.username == 'ed'
+
+### slide:: i
+# They become SQL when evaluated as a string.
+str(user_table.c.username == 'ed')
 
 ### slide::
-# the Column object is part of a class of objects known as 
-# "clause elements".   These objects have special behavior in Python
-# expressions, making use of Python's ability to "overload" operators
-# such as "==", "!=", etc. to produce a special kind of object.
+# ColumnElements can be further combined to produce more ColumnElements
 
-expression = user_table.c.username == 'ed'
-
-### slide:: -*-no_clear-*-
-# the comparison object we just got is itself a "clause element".
-expression
-
-### slide:: -*-no_clear-*-
-# this object, when evaluated as a string, becomes a SQL string.
-print expression
+print(
+    (user_table.c.username == 'ed') | (user_table.c.username == 'jack')
+)
 
 ### slide::
-# Each new clause element can be further transformed into a more complex
-# SQL expression, such as here using the | operator
-# to produce OR:
-
-print (user_table.c.username == 'ed') | (user_table.c.username == 'jack')
-
-### slide::
-# OR and AND are often produced using the or_() and and_() constructs 
-# explicitly
+# OR and AND are available with |, &, or or_() and and_()
 
 from sqlalchemy import and_, or_
 
-print and_(
-    user_table.c.fullname == 'ed jones', 
-        or_(
-            user_table.c.username == 'ed', 
-            user_table.c.username == 'jack'
+print(
+    and_(
+        user_table.c.fullname == 'ed jones',
+            or_(
+                user_table.c.username == 'ed',
+                user_table.c.username == 'jack'
+            )
         )
     )
 
 ### slide::
-# comparison operators like <, >..
+# comparison operators
 
-print user_table.c.id > 5
+print(user_table.c.id > 5)
 
 ### slide::
 # Compare to None produces IS NULL
 
-print user_table.c.fullname == None
+print(user_table.c.fullname == None)
 
 ### slide::
-# math operations...
+# "+" might mean "addition"....
 
-print user_table.c.id + 5
+print(user_table.c.id + 5)
 
-### slide:: -*-no_clear-*-
-# ...or string concatenation
+### slide:: i
+# ...or might mean "string concatenation"
 
-print user_table.c.fullname + "some name"
+print(user_table.c.fullname + "some name")
 
 ### slide::
 # an IN
 
-print user_table.c.username.in_(["wendy", "mary", "ed"])
+print(user_table.c.username.in_(["wendy", "mary", "ed"]))
 
 ### slide::
-# The result of any expression is an object that represents instructions
-# for how to generate a SQL string.
+# Expressions produce different strings according to *dialect*
+# objects.
 
 expression = user_table.c.username == 'ed'
-expression
 
-### slide::
-# The expression object has a method called *compile()* which transforms the expression
-# construct into a "baked" format that is specific to a certain kind 
-# of database.  We normally do not have to call this method explicitly.
-
+### slide:: i
+# MySQL....
 from sqlalchemy.dialects import mysql
-compiled = expression.compile(dialect=mysql.dialect())
+print(expression.compile(dialect=mysql.dialect()))
 
-### slide:: -*- no_clear -*-
-# MySQL compilation...
-print compiled
-
-### slide:: -*- no_clear -*-
-# PostgreSQL compilation...
+### slide:: i
+# PostgreSQL...
 from sqlalchemy.dialects import postgresql
-compiled = expression.compile(dialect=postgresql.dialect())
-print compiled
+print(expression.compile(dialect=postgresql.dialect()))
 
 ### slide::
-# The main thing the Compiled object does is create the SQL string...
+# the Compiled object also converts literal values to "bound"
+# parameters.
 
-compiled.string
-
-### slide:: -*- no_clear -*-
-# but it also has the "bound parameters" from our original statement
-# contained within it.
+compiled = expression.compile()
 compiled.params
 
 ### slide::
-# the Engine/Connection do the work of handling the "compile" step 
-# and the parameters when we pass a fully formed SQL expression construct
-# to the execute() method.
-
-engine.execute(user_table.select().where(user_table.c.username == 'ed'))
+# The "bound" parameters are extracted when we execute()
+engine.execute(
+        user_table.select().where(user_table.c.username == 'ed')
+    )
 
 ### slide::
-# let's put some data into the database.  We'll use an insert() 
-# statement, which we can usually get from the Table object directly:
+# Exercises:
+#
+# Produce these expressions using "user_table.c.fullname",
+# "user_table.c.id", and "user_table.c.username":
+#
+# 1. user.fullname = 'ed'
+#
+# 2. user.fullname = 'ed' AND user.id > 5
+#
+# 3. user.username = 'edward' OR (user.fullname = 'ed' AND user.id > 5)
+#
+
+
+### slide:: p
+# we can insert data using the insert() construct
 
 insert_stmt = user_table.insert().values(username='ed', fullname='ed jones')
-print insert_stmt
-
-### slide:: -*- no_exec -*-
-# we pass the statement to execute() to run it.  This time we use a Connection
-# object.
 
 conn = engine.connect()
 result = conn.execute(insert_stmt)
 
-### slide:: 
-# when we INSERT a single row using an insert() construct, we usually can
-# get at the primary key for the row from the result.  Surrogate
-# primary keys are usually generated by the database for us.
-print result.inserted_primary_key
+### slide:: i
+# executing an insert() gives us the "last inserted id"
+result.inserted_primary_key
 
-### slide:: -*- no_exec -*-
-# INSERT operations can also run multiple parameter sets in at once, if we 
-# leave off the "values()" part and just add the parameters to execute.
-# This runs *much* faster for large sets of data.
+### slide:: p
+# insert() and other DML can run multiple parameters at once.
 
 conn.execute(user_table.insert(), [
     {'username':'jack', 'fullname':'Jack Burger'},
     {'username':'wendy', 'fullname': 'Wendy Williams'}
 ])
 
-### slide:: -*- no_exec -*-
-# This is a free-standing select() statement.  Unlike table.select(),
-# we can control which columns to select.   Here we can see our new row
-# which has just been inserted.
+### slide:: p
+# select() is used to produce any SELECT statement.
 
 from sqlalchemy import select
 select_stmt = select([user_table.c.username, user_table.c.fullname]).\
             where(user_table.c.username == 'ed')
 result = conn.execute(select_stmt)
-
-### slide:: -*- no_clear -*-
-
 for row in result:
-    print row
+    print(row)
 
-### slide:: 
-# some demos of select().   We can select the whole table's columns
-# by passing it in as the argument:
+### slide:: p
+# select all columns from a table
 
 select_stmt = select([user_table])
-print conn.execute(select_stmt).fetchall()
+conn.execute(select_stmt).fetchall()
 
-
-### slide:: 
-# the WHERE method accepts any expression, including conjunctions
-# like AND and OR
+### slide:: p
+# specify a WHERE clause
 
 select_stmt = select([user_table]).\
                     where(
                         or_(
-                            user_table.c.username=='ed', 
-                            user_table.c.username=='wendy'
+                            user_table.c.username == 'ed',
+                            user_table.c.username == 'wendy'
                         )
                     )
-print conn.execute(select_stmt).fetchall()
+conn.execute(select_stmt).fetchall()
 
-### slide:: 
-# WHERE can be called repeatedly, these predicates are joined
-# by AND.  This pattern is called "method chaining", in SQLAlchemy
-# we call it "generative".
+### slide:: p
+# specify multiple WHERE, will be joined by AND
 
 select_stmt = select([user_table]).\
-                    where(user_table.c.username=='ed').\
-                    where(user_table.c.fullname=='ed jones')
-print conn.execute(select_stmt).fetchall()
+                    where(user_table.c.username == 'ed').\
+                    where(user_table.c.fullname == 'ed jones')
+conn.execute(select_stmt).fetchall()
 
-### slide:: 
+### slide:: p
 # ordering is applied using order_by()
 
 select_stmt = select([user_table]).\
                     order_by(user_table.c.username)
 print conn.execute(select_stmt).fetchall()
 
-### slide:: 
-# the text() construct is used to work with strings directly
+### slide::
+# Exercises:
+#
+# 1. use user_table.insert() and "r = conn.execute()" to emit this
+# statement:
+#
+# INSERT INTO user (username, fullname) VALUES ('dilbert', 'Dilbert Jones')
+#
+# 2. What is the value of 'user.id' for the above INSERT statement?
+#
+# 3. Using "select([user_table])", execute this SELECT:
+#
+# SELECT id, username, fullname FROM user WHERE username = 'wendy' OR
+#   username = 'dilbert' ORDER BY fullname
+#
+#
 
-from sqlalchemy import text
-text_stmt = text("select * from user where username=:name")
-print text_stmt
-
-### slide:: -*-no_clear-*-
-# the bound parameters are converted to the right format 
-# when we execute()
-print conn.execute(text_stmt, name="ed").fetchall()
-
-### slide:: -*- no_exec -*-
-# to briefly illustrate joins and foreign keys, let's create another table
-# that refers to the "user" table
+### slide:: p
+# joins / foreign keys
+# We create a new table to illustrate multi-table operations
 from sqlalchemy import ForeignKey
 
 address_table = Table("address", metadata,
@@ -234,6 +214,8 @@ address_table = Table("address", metadata,
                 )
 metadata.create_all(engine)
 
+### slide:: p
+# data
 conn.execute(address_table.insert(), [
     {"user_id":1, "email_address":"ed@ed.com"},
     {"user_id":1, "email_address":"ed@gmail.com"},
@@ -242,90 +224,98 @@ conn.execute(address_table.insert(), [
 ])
 
 ### slide::
-# we now have two Table objects.   If we wanted to select from both, we 
-# can use a join:
+# two Table objects can be joined using join()
 #
 # <left>.join(<right>, [<onclause>]).
 
-join_obj = user_table.join(address_table, user_table.c.id==address_table.c.user_id)
-print join_obj
+join_obj = user_table.join(address_table,
+                    user_table.c.id == address_table.c.user_id)
+print(join_obj)
 
 ### slide::
-# Because we made our address_table using a ForeignKey object, SQLAlchemy
-# already knows how these tables should be joined, so we can omit the "on clause"
+# ForeignKey allows the join() to figure out the ON clause automatically
 
 join_obj = user_table.join(address_table)
-print join_obj
+print(join_obj)
 
-### slide:: -*- no_exec -*-
-# now to illustrate our JOIN inside of a SELECT.   We can select all columns
-# from both tables.
+### slide:: pi
+# to SELECT from a JOIN, use select_from()
 
 select_stmt = select([user_table, address_table]).select_from(join_obj)
-result = conn.execute(select_stmt)
-print result.fetchall()
+conn.execute(select_stmt).fetchall()
 
 ### slide::
-# The true nature of SQLAlchemy is centered on its idea of a "selectable".
-# In SQL, we can select rows from tables, but also from SELECT statements.
-# So the select() object has a .c. attribute just like Table !
+# the select() object is a "selectable" just like Table.
+# it has a .c. attribute also.
 
-select_stmt = select([user_table]).where(user_table.c.username=='ed')
+select_stmt = select([user_table]).where(user_table.c.username == 'ed')
 
-print select([select_stmt.c.username]).where(select_stmt.c.username=='ed')
+print(
+    select([select_stmt.c.username]).\
+        where(select_stmt.c.username == 'ed')
+   )
 
 ### slide::
-# Though usually, when selecting from a SELECT, we need to "alias" it, which 
-# gives it a name when used as a subquery.  Most databases want us to do this:
+# In SQL, a "subquery" is usually an alias() of a select()
 
 select_alias = select_stmt.alias()
-print select([select_alias.c.username]).where(select_alias.c.username=='ed')
+print(
+    select([select_alias.c.username]).\
+        where(select_alias.c.username == 'ed')
+   )
 
 ### slide::
-# To show how this is often used, we'll show how to get usernames and the number
-# of email addresses they have, using COUNT and GROUP BY
+# A subquery against "address" counts addresses per user:
 
 from sqlalchemy import func
 address_subq = select([
-                    address_table.c.user_id, 
+                    address_table.c.user_id,
                     func.count(address_table.c.id).label('count')
                 ]).\
                 group_by(address_table.c.user_id).\
                 alias()
-print address_subq
+print(address_subq)
 
-### slide:: -*- no_clear -*-
-print conn.execute(address_subq).fetchall()
 
 ### slide::
-# With our "selectable" representing user ids and counts, we can combine
-# it with the "user" table using JOIN.   
+# we use join() to link the alias() with another select()
 
-username_plus_count = select([user_table.c.username, address_subq.c.count]).\
-                       select_from(
-                          user_table.join(address_subq)
-                       ).\
-                       order_by(user_table.c.username)
+username_plus_count = select([
+                            user_table.c.username,
+                            address_subq.c.count
+                        ]).select_from(
+                            user_table.join(address_subq)
+                         ).order_by(user_table.c.username)
 
-### slide:: -*- no_clear -*-
+### slide:: i
 
 conn.execute(username_plus_count).fetchall()
 
 ### slide::
-# a *scalar select* is a select statment that returns exactly one row and
-# one column, and can be used as a column expression.
+# Exercise
+#
+# Produce this SELECT:
+#
+# SELECT fullname, email_address FROM user JOIN address
+#   ON user.id = address.user_id WHERE username='ed'
+#   ORDER BY email_address
+#
+
+### slide::
+# a *scalar select* returns exactly one row and one column
 
 address_sel = select([
                 func.count(address_table.c.id)
                 ]).\
-                where(user_table.c.id==address_table.c.user_id)
-print address_sel
+                where(user_table.c.id == address_table.c.user_id)
+print(address_sel)
 
-### slide:: -*-no_clear -*-
-# as_scalar() is used for *correlated selects*.
+### slide:: ip
+# scalar selects can be used in column expressions,
+# specify it using as_scalar()
 
 select_stmt = select([user_table.c.username, address_sel.as_scalar()])
-print conn.execute(select_stmt).fetchall()
+conn.execute(select_stmt).fetchall()
 
 ### slide:: -*-no_exec -*-
 # to round out INSERT and SELECT, this is an UPDATE
