@@ -40,8 +40,12 @@ Overview
 
 .. _ddl:
 
-Data Definition Language (DDL)
-==============================
+Relational Schemas
+==================
+
+The :term:`schema` refers to a fixed structure configured within a database
+that defines how data will be represented.   The most fundamental unit
+of data within a schema is known as the :term:`table`.
 
 Table
 -----
@@ -158,6 +162,88 @@ The above schema can be created using DDL as follows:
            REFERENCES department(dep_id)
     )
 
+
+.. _normalization:
+
+Normalization
+-------------
+
+The structure of a relational schema is based on a system known as :term:`relational
+algebra`.  The central philosophy that drives the design of a relational schema
+is a process known as :term:`normalization`, which like most fundamental computer
+science concepts is an entire field of study onto itself.   In practice however,
+normalization usually boils down to a few simple practices that become second
+nature in not too much time.
+
+The general idea of normalization is to eliminate the repetition of data, so that
+any one particular piece of information is represented in exactly one place.
+By doing so, that piece of information becomes one of many atomic units by which
+data can be searched and operated upon.  For example, if hundreds of records
+all refer to a particular date record, we can correlate all those records on this
+single date record strictly based on the association of those identities.
+
+A typical example of denormalized data looks like::
+
+  Employee Language
+  ------------------
+  name        language   department
+  -------     --------   -------------
+  Dilbert     C++        Systems
+  Dilbert     Java       Systems
+  Wally       Python     Engineering
+  Wendy       Scala      Engineering
+  Wendy       Java       Engineering
+
+Normalization theory would claim the above table violates "second normal form"
+because the "non prime" attribute "department" is dependent
+only on the "name" column, and not "language", which means it
+is dependent on a subset
+of the table's  :term:`candidate key`, which would necessarily be the
+composite of "name" and "language"
+(Note that the author is carefully parsing the Wikipedia page for normalization
+here in order to state this correctly).   A proper normalization would use two
+tables along the lines of the following::
+
+  Employee Department
+  -------------------
+  name        department
+  --------    -----------
+  Dilbert     Systems
+  Wally       Engineering
+  Wendy       Engineering
+
+  Employee Language
+  ------------------
+  name        language
+  --------    --------
+  Dilbert     C++
+  Dilbert     Java
+  Wally       Python
+  Wendy       Scala
+  Wendy       Java
+
+While the formal reasoning behind the above change may be difficult to
+parse, a visual inspection of the data reveals more obviously
+how the second form is an improvement; the original version repeats
+duplicate associations between "name" and "department" many times
+according to how many distinct "language" values correspond to a name;
+whereas the second version uses distinct tables so that each "name/department"
+and "name/language" association can be expressed distinctly.
+
+The concept of data constraints, particularly the primary key constraint
+and the foreign key constraint, are designed to work naturally with
+the concept of normalization.   The above schema would be applied to
+constraints by establishing "Employee Department->name" as a primary key,
+establishing "Employee Language->name, language" as a composite primary key,
+and then creating a foreign key such that "Employee Language->name" must
+refer to "Employee Department->name".  When a schema resists being
+organized into simple primary and foreign key relationships, that's often
+a sign that it isn't strongly normalized.
+
+The Wikipedia page on normalization is a great place to learn more about
+normalization, at http://en.wikipedia.org/wiki/Database_normalization.
+
+
 .. _dml:
 
 Data Manipulation Language (DML)
@@ -182,6 +268,46 @@ into each row.
     INSERT INTO employee (emp_id, emp_name, dep_id)
                 VALUES (2, 'wally', 1);
 
+.. topic:: Auto Incrementing Integer Keys
+
+  Most modern databases feature a built-in system of generating incrementing integer
+  values, which are in particular usually used for tables that have surrogate integer
+  primary keys, such as our ``employee`` and ``department`` tables.   For example, when using
+  SQLite, the above ``emp_id`` column will generate an integer value automatically; when
+  using MySQL, an integer primary key declared with ``AUTO INCREMENT`` will do so as well;
+  and on Postgresql, declaring a primary key with the datatype ``SERIAL`` will have
+  the same end effect.  When using these so-called "auto incrementing" primary key
+  generators, we *omit* the column from the INSERT statement:
+
+  .. sourcecode:: sql
+
+      INSERT INTO employee (emp_name, dep_id)
+                  VALUES ('dilbert', 1);
+
+      INSERT INTO employee (emp_name, dep_id)
+                  VALUES ('wally', 1);
+
+  Databases that feature primary key generation systems will also
+  feature some means of acquiring the "generated" integer identifier
+  after the fact, using non-standard SQL extensions and/or functions.
+  When using Postgresql, one such way of reading these generated identifiers
+  is to use ``RETURNING``:
+
+  .. sourcecode:: sql
+
+      INSERT INTO employee (emp_name, dep_id)
+                  VALUES ('dilbert', 1) RETURNING emp_id;
+
+      emp_id
+      ------
+        1
+
+  While every database features a different system of generating and retrieving
+  these keys, we'll generally refer to the style above where the integer primary key
+  can be omitted from an INSERT.   When using SQLAlchemy, one of the most fundamental
+  features it provides is a consistent and transparent system
+  of utilizing the wide variety of usage key generation and retrieval schemes.
+
 
 Updates
 --------
@@ -192,9 +318,13 @@ identifies those columns which should be modified, as well to what value:
 
 .. sourcecode:: sql
 
-    UPDATE employee SET dep_id=7
-                  WHERE emp_name='dilbert'
+    UPDATE employee SET dep_id=7 WHERE emp_name='dilbert'
 
+When an UPDATE statement like the above one executes, it may match any number of
+rows, including none at all.  An UPDATE statement typically has a "row count"
+value associated with a particular execution, which indicates the number of
+rows that matched the WHERE criteria, and therefore represents that number
+of rows that were subject to the SET clause.
 
 Deletes
 -------
@@ -205,6 +335,8 @@ a ``WHERE`` clause to identify those rows which should be deleted:
 .. sourcecode:: sql
 
     DELETE FROM employee WHERE dep_id=1
+
+Above, all employee records within department id 1 will be deleted.
 
 .. _queries:
 
@@ -366,6 +498,24 @@ evaluate the meaning its argument, it only counts how many times it is called:
     -------
 
        18
+
+Another aggregate expression might return to us the average number
+of employees within departments.   To accomplish this, we also make use of
+the ``GROUP BY`` clause, described below, as well as a :term:`subquery`:
+
+.. sourcecode:: sql
+
+    SELECT avg(emp_count) FROM
+      (SELECT count(*) AS emp_count
+        FROM employee GROUP BY dep_id) AS emp_counts
+
+    ?avg?
+    -----
+      2
+
+Note the above query only takes into account non-empty departments.  To
+include empty departments would require a more complex sub-query that
+takes into account rows from ``department`` as well.
 
 Grouping
 --------

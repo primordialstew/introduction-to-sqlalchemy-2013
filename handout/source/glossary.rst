@@ -80,7 +80,7 @@ Relational Terms
 
     candidate key
 
-        A relational algebra term referring to an attribute or set
+        A :term:`relational algebra` term referring to an attribute or set
         of attributes that form a uniquely identifying key for a
         row.  A row may have more than one candidate key, each of which
         is suitable for use as the primary key of that row.
@@ -426,6 +426,8 @@ Relational Terms
         (via Wikipedia)
 
         .. seealso::
+
+            :ref:`normalization`
 
             http://en.wikipedia.org/wiki/Database_normalization
 
@@ -808,9 +810,6 @@ SQLAlchemy Core / Object Relational Terms
 .. glossary::
     :sorted:
 
-    orphan
-        A mapped instance with a severed link to a collection or parent object.
-
     threadlocal
         A shared data structure whose data members are visible only to
         the thread which set them. The concept of "thread local" in
@@ -822,10 +821,15 @@ SQLAlchemy Core / Object Relational Terms
             http://docs.python.org/2/library/threading.html#threading.local
 
     reflection
-        The process of constructing SQLAlchemy Table objects
-        programatically at runtime by querying a live database's
-        system tables for column and key definitions.
+        The process of constructing SQLAlchemy :class:`~sqlalchemy.schema.Table`
+        objects in an automated or semi-automated fashion, where information about
+        tables, columns and constraints are loaded from an existing
+        database's internal catalogs in order to compose in-memory
+        structures representing a schema.
 
+        .. seealso::
+
+            :ref:`metadata_reflection`
 
     engine
         An object that provides a source of database connectivity.  The
@@ -1038,19 +1042,6 @@ SQLAlchemy Core / Object Relational Terms
         When used at the instance level, these descriptors help to keep
         track of changes to values, and also :term:`lazy load` unloaded values
         and collections from the database when the attribute is accessed.
-
-    instrumentation
-    instrumented
-        Instrumentation refers to the process of augmenting the functionality
-        and attribute set of a particular class.   Ideally, the
-        behavior of the class should remain close to a regular
-        class, except that additional behviors and features are
-        made available.  The SQLAlchemy :term:`mapping` process,
-        among other things, adds database-enabled :term:`descriptors`
-        to a mapped
-        class which each represent a particular database column
-        or relationship to a related class.
-
 
     lazy load
     lazy loads
@@ -1404,6 +1395,143 @@ SQLAlchemy Core / Object Relational Terms
 
             :ref:`sqla:session_object_states`
 
+    one to many
+        A style of :func:`~sqlalchemy.orm.relationship` which links
+        the primary key of the parent mapper's table to the foreign
+        key of a related table.   Each unique parent object can
+        then refer to zero or more unique related objects.
+
+        The related objects in turn will have an implicit or
+        explicit :term:`many to one` relationship to their parent
+        object.
+
+        An example one to many schema (which note is identical
+        to the :term:`many to one` schema):
+
+        .. sourcecode:: sql
+
+            CREATE TABLE department (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30)
+            )
+
+            CREATE TABLE employee (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30),
+                dep_id INTEGER REFERENCES department(id)
+            )
+
+        The relationship from ``department`` to ``employee`` is
+        one to many, since many employee records can be associated with a
+        single department.  A SQLAlchemy mapping might look like::
+
+            class Department(Base):
+                __tablename__ = 'department'
+                id = Column(Integer, primary_key=True)
+                name = Column(String(30))
+                employees = relationship("Employee")
+
+            class Employee(Base):
+                __tablename__ = 'employee'
+                id = Column(Integer, primary_key=True)
+                name = Column(String(30))
+                dep_id = Column(Integer, ForeignKey('department.id'))
+
+        .. seealso::
+
+            :term:`relationship`
+
+            :term:`many to one`
+
+            :term:`backref`
+
+    many to one
+        A style of :func:`~sqlalchemy.orm.relationship` which links
+        a foreign key in the parent mapper's table to the primary
+        key of a related table.   Each parent object can
+        then refer to exactly zero or one related object.
+
+        The related objects in turn will have an implicit or
+        explicit :term:`one to many` relationship to any number
+        of parent objects that refer to them.
+
+        An example many to one schema (which note is identical
+        to the :term:`one to many` schema):
+
+        .. sourcecode:: sql
+
+            CREATE TABLE department (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30)
+            )
+
+            CREATE TABLE employee (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30),
+                dep_id INTEGER REFERENCES department(id)
+            )
+
+
+        The relationship from ``employee`` to ``department`` is
+        many to one, since many employee records can be associated with a
+        single department.  A SQLAlchemy mapping might look like::
+
+            class Department(Base):
+                __tablename__ = 'department'
+                id = Column(Integer, primary_key=True)
+                name = Column(String(30))
+
+            class Employee(Base):
+                __tablename__ = 'employee'
+                id = Column(Integer, primary_key=True)
+                name = Column(String(30))
+                dep_id = Column(Integer, ForeignKey('department.id'))
+                department = relationship("Department")
+
+        .. seealso::
+
+            :term:`relationship`
+
+            :term:`one to many`
+
+            :term:`backref`
+
+    backref
+        An extension to the :term:`relationship` system whereby two
+        distinct :func:`~sqlalchemy.orm.relationship` objects can be
+        mutually associated with each other, such that they coordinate
+        in memory as changes occur to either side.   The most common
+        way these two relationships are constructed is by using
+        the :func:`~sqlalchemy.orm.relationship` function explicitly
+        for one side, specifying the ``backref`` keyword to it so that
+        the other :func:`~sqlalchemy.orm.relationship` is created
+        automatically.  We can illustrate this against the example we've
+        used in :term:`one to many` as follows::
+
+            class Department(Base):
+                __tablename__ = 'department'
+                id = Column(Integer, primary_key=True)
+                name = Column(String(30))
+                employees = relationship("Employee", backref="department")
+
+            class Employee(Base):
+                __tablename__ = 'employee'
+                id = Column(Integer, primary_key=True)
+                name = Column(String(30))
+                dep_id = Column(Integer, ForeignKey('department.id'))
+
+        A backref can be applied to any relationship, including one to many,
+        many to one, and :term:`many to many`.
+
+        .. seealso::
+
+            :term:`relationship`
+
+            :term:`one to many`
+
+            :term:`many to one`
+
+            :term:`many to many`
 
     many to many
         A style of :func:`sqlalchemy.orm.relationship` which links two tables together
@@ -1558,28 +1686,52 @@ SQLAlchemy Core / Object Relational Terms
 
     relationship
     relationships
-        In SQLAlchemy, the junction of two mapped classes, or of a
-        mapped class to itself.  The relationship usually corresponds
-        to a foreign key relationship between two tables or
-        selectables.
+        A connecting unit between two mapped classes, corresponding
+        to some relationship between the two tables in the database.
+
+        The relationship is defined using the SQLAlchemy function
+        :func:`~sqlalchemy.orm.relationship`.   Once created, SQLAlchemy
+        inspects the arguments and underlying mappings involved
+        in order to classify the relationship as one of three types:
+        :term:`one to many`, :term:`many to one`, or :term:`many to many`.
+        With this classification, the relationship construct
+        handles the task of persisting the appropriate linkages
+        in the database in response to in-memory object associations,
+        as well as the job of loading object references and collections
+        into memory based on the current linkages in the
+        database.
 
         .. seealso::
 
             :ref:`sqla:relationship_config_toplevel`
 
-    scoped_session
-        A front end for sessionmaker which provides a "global"
-        registry of sessions, each mapped to the current thread.
+    scoped session
+        A helper object intended to provide a *registry* of
+        :term:`session` objects, allowing an application to refer
+        to the registry as a global variable which provides
+        access to a contextually appropriate session object.
+
+        The scoped session object is an optional construct
+        often used with web applications.
 
         .. seealso::
+
+            :term:`Session`
 
             :ref:`sqla:unitofwork_contextual` - an in-depth
             introduction to the :class:`sqlalchemy.orm.scoped_session` object.
 
+
     selectable
-        What relational algebra refers to as a relation, SQLAlchemy
-        refers to as a selectable. A table, subquery, or any other
-        table-valued SQL expression.
+        Refers to the SQLAlchemy analogue for a "relation" in relational
+        algebra, which is any object that represents a series of
+        rows in a database.   "Selectable"
+        actually refers in the API to objects that extend from the
+        :class:`sqlalchemy.sql.expression.Selectable` class, and
+        refers to such row-representing constructs as the
+        :class:`~sqlalchemy.schema.Table`, the :class:`~sqlalchemy.sql.expression.Join`,
+        and the :class:`~sqlalchemy.sql.expression.Select`
+        construct.
 
     Session
         The container or scope for ORM database operations. Sessions
@@ -1591,14 +1743,24 @@ SQLAlchemy Core / Object Relational Terms
 
             :ref:`session_toplevel`
 
-    session transaction
-        ORM-level transaction. Session activity may span multiple
-        databases, and the session transaction coordinates a
-        connection-level transaction for each. Database features such
-        as save points and two-phase transactions are also supported.
-
     sessionmaker
-        An optional, configurable factory object used to create new
-        Session instances using a chosen set of construction
-        arguments.
+        A *factory* for :term:`session` objects.   The :class:`~sqlalchemy.orm.session.sessionmaker`
+        construct basically allows a series of parameters to be associated
+        with a :class:`~sqlalchemy.orm.session.Session` constructor.
 
+        In reality, the sessionmaker is just slightly more elaborate
+        than a simple function, that is an expression like this::
+
+            from sqlalchemy.orm import sessionmaker
+            my_session = sessionmaker(bind=engine, autoflush=False)
+
+        is conceptually very similar to the following::
+
+            from sqlalchemy.orm import Session
+            my_session = lambda: Session(bind=engine, autoflush=False)
+
+        .. seealso::
+
+            :term:`Session`
+
+            :term:`scoped session`
