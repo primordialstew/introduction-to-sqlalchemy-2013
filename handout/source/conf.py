@@ -185,7 +185,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PyCon2013-IntroductiontoSQLAlchemy.tex', u'PyCon 2013 - Introduction to SQLAlchemy',
+  ('index', 'handout.tex', u'PyCon 2013 - Introduction to SQLAlchemy',
    u'Michael Bayer', 'manual'),
 ]
 

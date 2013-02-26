@@ -41,6 +41,14 @@ help:
 clean:
 	-rm -rf $(BUILDDIR)/*
 
+dist-pdf: latexpdf
+	cp $(BUILDDIR)/latex/handout.pdf ..
+
+dist-html:
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) .
+	@echo
+	@echo "Build finished.  The HTML pages are in ."
+
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
