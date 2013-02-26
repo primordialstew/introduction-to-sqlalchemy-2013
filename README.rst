@@ -41,17 +41,17 @@ Course Time: Thursday, March 14, 1:20 PM - 4:40 PM
 
 Location: Great America Floor 2B R3
 
- ============  ==================================
-   Time             Topic
- ============  ==================================
- 1:20 - 1:30   Welcome / Setup
- 1:30 - 1:40   Prerequisite Material Review
- 1:40 - 1:45   Overview of SQLAlchemy
- 1:45 - 2:00   Engine, Connection, Transactions
- 2:00 - 2:20   Table Metadata, Reflection, DDL
- 2:20 - 2:50   SQL Expressions
- 2:50 - 3:10   break
- 3:10 - 4:40   ORM
- ============  ==================================
+============  ==================================
+ Time             Topic
+============  ==================================
+1:20 - 1:30   Welcome / Setup
+1:30 - 1:40   Prerequisite Material Review
+1:40 - 1:45   Overview of SQLAlchemy
+1:45 - 2:00   Engine, Connection, Transactions
+2:00 - 2:20   Table Metadata, Reflection, DDL
+2:20 - 2:50   SQL Expressions
+2:50 - 3:10   break
+3:10 - 4:40   ORM
+============  ==================================
 
 
