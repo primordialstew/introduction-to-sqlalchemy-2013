@@ -56,7 +56,11 @@
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <p>This package contains:</p>
 <ul class="simple">
-<li>student handout, buildable as HTML, PDF, or other formats via <a class="reference external" href="http://sphinx-doc.org/">Sphinx</a> , in <tt class="docutils literal"><span class="pre">handout/</span></tt></li>
+<li>student handout built as a PDF file <tt class="docutils literal"><span class="pre">handout.pdf</span></tt>, as well as
+an HTML layout starting at <tt class="docutils literal"><span class="pre">handout/index.html</span></tt>.</li>
+<li><a class="reference external" href="http://sphinx-doc.org/">Sphinx</a> source files for the handout in <tt class="docutils literal"><span class="pre">handout/source</span></tt>.  Those
+familiar with Sphinx can build the handout document in other formats
+using the makefile <tt class="docutils literal"><span class="pre">handout/Makefile</span></tt>.</li>
 <li>Interactive Python &#8220;slide runner&#8221; application, which
 is essentially a customized <a class="reference external" href="http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a>
 that can step through segments of a Python script</li>
@@ -93,6 +97,10 @@ of the local application, which will be using the latest and greatest.</p>
 <p>The most recent version of this package is available using git:</p>
 <div class="highlight-python"><pre>git clone https://bitbucket.org/zzzeek/pycon2013_student_package.git</pre>
 </div>
+<p>While git is preferred so that the package can easily be updated,
+those who don&#8217;t have git installed can also download the file
+directly as a .zip file via
+<a class="reference external" href="https://bitbucket.org/zzzeek/pycon2013_student_package/get/master.zip">https://bitbucket.org/zzzeek/pycon2013_student_package/get/master.zip</a>.</p>
 </div>
 <div class="section" id="building-the-documentation-handout">
 <h2>Building the Documentation Handout<a class="headerlink" href="#building-the-documentation-handout" title="Permalink to this headline">¶</a></h2>

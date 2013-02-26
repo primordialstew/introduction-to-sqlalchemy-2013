@@ -7,7 +7,12 @@ Contents
 
 This package contains:
 
-* student handout, buildable as HTML, PDF, or other formats via Sphinx_	, in ``handout/``
+* student handout built as a PDF file ``handout.pdf``, as well as
+  an HTML layout starting at ``handout/index.html``.
+
+* Sphinx_ source files for the handout in ``handout/source``.  Those
+  familiar with Sphinx can build the handout document in other formats
+  using the makefile ``handout/Makefile``.
 
 * Interactive Python "slide runner" application, which
   is essentially a customized `REPL <http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop>`_
@@ -53,6 +58,11 @@ Obtaining the Package
 The most recent version of this package is available using git::
 
 	git clone https://bitbucket.org/zzzeek/pycon2013_student_package.git
+
+While git is preferred so that the package can easily be updated,
+those who don't have git installed can also download the file
+directly as a .zip file via
+https://bitbucket.org/zzzeek/pycon2013_student_package/get/master.zip.
 
 Building the Documentation Handout
 ==================================
