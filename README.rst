@@ -5,6 +5,13 @@ Introduction to SQLAlchemy - Pycon 2013
 This package contains the student prerequisite handout as well
 as the in-class software we'll be running.
 
+Tutorial Updates
+================
+
+We've been given access to the page at https://us.pycon.org/2013/community/tutorials/16/
+to provide updates on tutorial status.   We're hoping to be around at least for the
+Wednesday 6:30 setup session.
+
 Preparing for the Tutorial
 ==========================
 
