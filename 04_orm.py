@@ -1,372 +1,305 @@
 ### slide::
-# Part I.  Basic Configuration.
 
-### slide::
-
-# when using the ORM, we typically declare our mapped
-# classes using the *declarative* system, which allows
-# us to define classes and associated table metadata at
-# the same time.  By extending our classes from Base
-# below, a set of classes can refer to each other by name
-# during configuration.
+# The *declarative* system is normally used to configure
+# object relational mappings.
 
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 ### slide::
-# The User class defines id, name, fullname columns
-# on a table named 'user'.  __repr__() is optional.
+# a basic mapping.   __repr__ is optional.
 
 from sqlalchemy import Column, Integer, String
+
 class User(Base):
-     __tablename__ = 'user'
+    __tablename__ = 'user'
 
-     id = Column(Integer, primary_key=True)
-     name = Column(String)
-     fullname = Column(String)
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    fullname = Column(String)
 
-     def __repr__(self):
+    def __repr__(self):
         return "<User(%r, %r)>" % (
                 self.name, self.fullname
             )
 
 ### slide::
-# the declarative system created Table metadata for us -
-# we can get to it via the __table__ attribute.
+# the User class now has a Table object associated with it.
 
 User.__table__
 
 ### slide::
-# Another attribute, __mapper__, illustrates the *mapper* object,
-# which represents the mapping of the User class to the 'user'
-# table.  This object usually stays behind the scenes.
+# The Mapper object mediates the relationship between User
+# and the "user" Table object.
 
 User.__mapper__
 
-### slide:: -*- no_exec -*-
-# The Base class holds onto a MetaData object which collects
-# each Table as declared.   Using this MetaData we can create
-# an Engine and create tables using the usual create_all()
-# mechanism.
+### slide::
+# User has a default constructor, accepting field names
+# as arguments.
+
+ed_user = User(name='ed', fullname='Edward Jones')
+
+### slide::
+# The "id" field is the primary key, which starts as None
+# if we didn't set it explicitly.
+
+print ed_user.name
+print ed_user.fullname
+print ed_user.id
+
+### slide:: p
+# The MetaData object is here too, available from the Base.
 
 from sqlalchemy import create_engine
 engine = create_engine('sqlite://')
 Base.metadata.create_all(engine)
 
 ### slide::
-# Part II.  Working with objects and Sessions.
+# To persist and load User objects from the database, we
+# use a Session object.
+
+from sqlalchemy.orm import Session
+session = Session(bind=engine)
 
 ### slide::
-# The User class gets assigned a default constructor,
-# that allows us to pass in fields by name.
-
-ed_user = User(name='ed', fullname='Edward Jones')
-
-### slide::
-# our User object has "name" and "fullname" assigned,
-# but the "id" field, which is the primary key, is not
-# yet present.
-
-print ed_user.name
-print ed_user.fullname
-print ed_user.id
-
-### slide::
-# So far, ed_user is not associated with a database in any way.
-# The ORM uses an object called the Session to handle the conversation
-# with the database.  We create Session objects using a factory
-# called a sessionmaker, which we normally configure given an
-# Engine as a source of connectivity.
-
-from sqlalchemy.orm import sessionmaker
-Session = sessionmaker(bind=engine)
-
-### slide::
-# our factory is called 'Session', and we create a new session
-# object from it, and assign it to the name 'session'.
-
-session = Session()
-
-### slide::
-# to put data into the Session, we usually use the add() method.
-# When ed_user is added, we say the object is *pending*.  No connection
-# to the database has been established yet.
+# new objects are placed into the Session using add().
 session.add(ed_user)
 
-### slide:: p
-# however, when we ask the Session object to query for data, three
-# things happen: it establishes connectivity to the database, it
-# *flushes* all pending changes to the database, then emits a SELECT
-# statement for the data we want.
+### slide:: pi
+# the Session will *flush* *pending* objects
+# to the database before each Query.
 
 our_user = session.query(User).filter_by(name='ed').first()
-### slide:: p, i
 our_user
 
 ### slide::
-# at the point, the Session is now maintaining an open transaction
-# to the database, which will remain until we commit or roll back.
-# Note this is the opposite of the "autocommit" behavior featured
-# by the Engine by itself.
+# the Session is now in a transaction.  Here's the Connection.
 
 session.connection()
 
 ### slide:: p
-# connection() returns a core Connection object, with the usual
-# execute() method.
+# we can use the Connection directly too.
+
 session.connection().execute("select * from user").fetchall()
 
 ### slide::
-# now that the flush has occurred, and the row for "ed" was INSERTed,
-# the database's primary key generation mechanism has generated a
-# primary key.   The ORM applies this value to the appropriate attribute
-# or attributes present on the mapped object.
-
+# the User object we've inserted now has a value for ".id"
 print ed_user.id
 
 ### slide::
-# the Session uses an important pattern called the *identity map*.
-# This pattern provides that one and only one copy of an object be
-# present for a given primary key.   This means the "our_user" object
-# we queried for is the *same* object as the "ed_user" we added - one
-# identity per primary key per Session.
+# the Session maintains a *unique* object per identity.
+# so "ed_user" and "our_user" are the *same* object
 
 ed_user is our_user
 
 
 ### slide::
-# we add some more User objects to facilitate the demonstration.
-# these three objects are pending until the next flush.
+# Add more objects to be pending for flush.
 
 session.add_all([
-     User(name='wendy', fullname='Wendy Williams'),
-     User(name='mary', fullname='Mary Contrary'),
-     User(name='fred', fullname='Fred Flinstone')
+    User(name='wendy', fullname='Wendy Weathersmith'),
+    User(name='mary', fullname='Mary Contrary'),
+    User(name='fred', fullname='Fred Flinstone')
 ])
 
 ### slide::
-# while we have three objects pending, we will also
-# modify part of ed_user.
+# modify "ed_user" - the object is now marked as *dirty*.
 
 ed_user.fullname = 'Ed Jones'
 
 ### slide::
-# We can look into the Session to see which objects have been marked
-# as "dirty"...
+# the Session can tell us which objects are dirty...
 
 session.dirty
 
 ### slide::
-# and also look to see which objects are considered pending, or "new"...
+# and can also tell us which objects are pending...
 
 session.new
 
 ### slide:: p i
-# We instruct the Session to commit the transaction.  This implies a final
-# flush of all remaining changes not yet flushed, then the transaction
-# is committed.
+# The whole transaction is committed.  Commit always triggers
+# a final flush of remaining changes.
 
 session.commit()
 
-
 ### slide:: p
-# After a commit, the Session by default invalidates, or *expires* the state of all the
-# objects inside.   On the next access of any of the objects, a new transaction
-# is begun, and the data is re-fetched.  While this is configurable, by default
-# it ensures that data changes committed by other, concurrent transactions
-# is pulled into the local Session.
+# After a commit, theres no transaction.  The Session
+# *invalidates* all data, so that accessing them will automatically
+# start a *new* transaction and re-load from the database.
 
 ed_user.fullname
-
-### slide:: pi
-# hitting it again, the value is locally present.
-ed_user.fullname
-
 
 ### slide::
-# to illustrate a rollback, we'll change ed_user again, and also add a new user
-# we're going to change our mind about.
+# Make another "dirty" change, and another "pending" change,
+# that we might change our minds about.
 
 ed_user.name = 'Edwardo'
 fake_user = User(name='fakeuser', fullname='Invalid')
 session.add(fake_user)
 
 ### slide::
-# we query for the changes we just made.  The pending state is flushed,
-# the SELECT is emitted, and we see the results.
+# run a query, our changes are flushed; results come back.
 
 session.query(User).filter(User.name.in_(['Edwardo', 'fakeuser'])).all()
 
 ### slide::
-# however, this is all inside of a transaction.  We can emit a ROLLBACK.
-# the Session rolls back the state and again invalidates all object
-# attributes.
+# But we're inside of a transaction.  Roll it back.
 session.rollback()
 
 ### slide::
-# where we see that ed_user's "name" is reset...
+# ed_user's name is back to normal
 ed_user.name
 
 ### slide::
-# and the "fake_user" has been evicted from the session.
+# "fake_user" has been evicted from the session.
 fake_user in session
 
 ### slide::
-# a new SELECT reveals that the "fakeuser" row previously INSERTed is
-# now gone.
+# and the data is gone from the database too.
 
 session.query(User).filter(User.name.in_(['ed', 'fakeuser'])).all()
 
+### slide::
+# Exercises:
+#
+# 1. Create a class/mapping for this table, call the class Network
+#
+# CREATE TABLE network (
+#      network_id INTEGER PRIMARY KEY,
+#      name VARCHAR(100) NOT NULL,
+# )
+#
+# 2. emit Base.metadata.create_all(engine) to create the table
+#
+# 3. commit a few Network objects to the database:
+#
+# Network(name='net1'), Network(name='net2')
+#
+#
 
 ### slide::
-# Part III.  Querying
-
-### slide::
-# the first thing to note about the ORM and querying is that our
-# mapped class User has some of the same behavior as the Table
-# objects we worked with in the core.  We can refer to columns from
-# the class directly to generate SQL expressions.
+# The attributes on our mapped class act like Column objects, and
+# produce SQL expressions.
 
 print User.name == "ed"
 
-### slide::
-# We can, if we wanted, use these expressions to a large degree within
-# Core constructs such as SELECT.
+### slide:: p
+# These SQL expressions are compatible with the select() object
+# we introduced earlier.
 
 from sqlalchemy import select
 
-print select([User.name, User.fullname]).\
+sel = select([User.name, User.fullname]).\
         where(User.name == 'ed').\
         order_by(User.id)
 
-### slide::
-# This is mostly* equivalent to using the Table metadata that we've mapped;
-# the Table here is just like the Table we created using the core.
-#
-# * there are some behavioral differences between User.<somename> and
-# User.__table__.<somename>, but these are only apparent in more
-# advanced situations.
+session.connection().execute(sel).fetchall()
 
-user_table = User.__table__
-
-print select([user_table.c.name, user_table.c.fullname]).\
-        where(user_table.c.name == 'ed').\
-        order_by(user_table.c.id)
-
-### slide::
-# However, the needs of mapped classes as well as the usage of the Session
-# warrants that we normally use the Query object, at least as the starting
-# point of SELECTing for data based on ORM classes.
-
-query = session.query(User).order_by(User.id)
-print query
 
 ### slide:: p
-# among other things, a Query is automatically associated with its parent
-# Session as well as the ongoing transaction.  It can be iterated directly;
-# there is no explicit execute() method needed.
+# but when using the ORM, the Query() object provides a lot more functionality,
+# here selecting the User *entity*.
 
-for instance in query:
-    print instance.name, instance.fullname
+query = session.query(User).filter(User.name == 'ed').order_by(User.id)
+
+query.all()
+
 
 ### slide:: p
-# Besides querying for whole objects, we can query for individual columns...
+# Query can also return individual columns
 
 for name, fullname in session.query(User.name, User.fullname):
     print name, fullname
 
 ### slide:: p
-# ... and we can also query for a combination of objects and columns.  The
-# Query returns a named tuple in all cases except for the case of a single
-# mapped class.
+# and can mix entities / columns together.
 
 for row in session.query(User, User.name):
     print row.User, row.name
 
 ### slide:: p
-# Query includes slicing capability that automatically emits LIMIT
-# and OFFSET directives, or the equivalent concept supported by the
-# underlying database.
+# Array slices produce LIMIT/OFFSET, or equivalent
 
 for u in session.query(User).order_by(User.id)[1:3]:
     print u
 
 ### slide:: p
-# basic WHERE clause construction is provided by the filter_by() method,
-# which accepts attribute names as keyword arguments, and compares on equality.
+# the WHERE clause is either by filter_by(), which is convenient
 
 for name, in session.query(User.name).\
-             filter_by(fullname='Ed Jones'):
+                filter_by(fullname='Ed Jones'):
     print name
 
 ### slide:: p
-# the filter() method complements filter_by() by accepting any SQL expression
-# element, including equality...
+# or filter(), which is more flexible
 
 for name, in session.query(User.name).\
-             filter(User.fullname=='Ed Jones'):
+                filter(User.fullname == 'Ed Jones'):
     print name
 
 ### slide:: p
-# or a more complex expression, including comparison operators and
-# conjunctions.
+# conjunctions can be passed to filter() as well
 
 from sqlalchemy import or_
 
 for name, in session.query(User.name).\
-             filter(or_(User.fullname=='Ed Jones', User.id < 5)):
+                filter(or_(User.fullname == 'Ed Jones', User.id < 5)):
     print name
 
 ### slide::
-# like the select() object, Query features the same system of "method chaining",
-# which recall SQLAlchemy refers to as "generative".  Multiple calls to
-# filter() or filter_by() are joined by "AND".
+# multiple filter() calls join by AND just like select().where()
 
 for user in session.query(User).\
-          filter(User.name=='ed').\
-          filter(User.fullname=='Ed Jones'):
+                        filter(User.name == 'ed').\
+                        filter(User.fullname == 'Ed Jones'):
     print user
 
 ### slide::
-# Query result methods.   Start with a query that we know returns
-# just one row.
+# Query has some variety for returning results
 
 query = session.query(User).filter_by(fullname='Ed Jones')
 
 ### slide:: p
-# calling the all() method on the Query gives us a list of all results.
+# all() returns a list
 
 query.all()
 
 ### slide:: p
-# the first() method, gives us just the first result as a scalar.
+# first() returns the first row, or None
 
 query.first()
 
 ### slide:: p
-# there's also a method called one().
+# one() returns the first row and verifies that there's one and only one
 
 query.one()
 
-### slide::
-# first() and one() differ in that first() returns the first row
-# or None, one() asserts that one and only one row exists.
+### slide:: p
+# if there's not one(), you get an error
 
 query = session.query(User).filter_by(fullname='nonexistent')
-
-### slide:: i
-
-print query.first()
-
-### slide:: i
-
 query.one()
 
-### slide::
-# count() is another convenience method that performs a count
-# of rows returned from a SELECT statement
+### slide:: p
+# if there's more than one(), you get an error
 
-session.query(User).filter(User.name.like('%ed')).count()
+query = session.query(User)
+query.one()
+
+# Exercises
+#
+# 1. Produce a Query object representing the list of "fullname" values for
+# all User objects in alphabetical order.
+#
+# 2. call .all() on the query to make sure it works!
+#
+# 3. build a second Query object from the first that also selects
+# only User rows with the name "mary" or "ed".
+#
+# 4. return only the second row of the Query from #3.
+
 
 ### slide::
 # Part IV. Working with relationships.

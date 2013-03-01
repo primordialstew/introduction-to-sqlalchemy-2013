@@ -4,10 +4,10 @@ from sqlalchemy import MetaData, Table, Column, String, Integer
 
 metadata = MetaData()
 user_table = Table('user', metadata,
-            Column('id', Integer, primary_key=True),
-            Column('username', String(50)),
-            Column('fullname', String(50))
-    )
+                    Column('id', Integer, primary_key=True),
+                    Column('username', String(50)),
+                    Column('fullname', String(50))
+                   )
 
 ### slide:: p
 # new SQLite database and generate the table.
@@ -104,6 +104,7 @@ compiled.params
 
 ### slide::
 # The "bound" parameters are extracted when we execute()
+
 engine.execute(
         user_table.select().where(user_table.c.username == 'ed')
     )
@@ -138,8 +139,8 @@ result.inserted_primary_key
 # insert() and other DML can run multiple parameters at once.
 
 conn.execute(user_table.insert(), [
-    {'username':'jack', 'fullname':'Jack Burger'},
-    {'username':'wendy', 'fullname': 'Wendy Williams'}
+    {'username': 'jack', 'fullname': 'Jack Burger'},
+    {'username': 'wendy', 'fullname': 'Wendy Weathersmith'}
 ])
 
 ### slide:: p
@@ -317,40 +318,36 @@ print(address_sel)
 select_stmt = select([user_table.c.username, address_sel.as_scalar()])
 conn.execute(select_stmt).fetchall()
 
-### slide:: -*-no_exec -*-
+### slide:: p
 # to round out INSERT and SELECT, this is an UPDATE
 
 update_stmt = address_table.update().\
                     values(email_address="jack@msn.com").\
-                    where(address_table.c.email_address=="jack@yahoo.com")
+                    where(address_table.c.email_address == "jack@yahoo.com")
 
 result = conn.execute(update_stmt)
 
-### slide:: -*-no_clear -*-
-# UPDATE and DELETE have a "rowcount", number of rows matched
-# by the WHERE clause.
-result.rowcount
-
-### slide:: -*-no_exec -*-
+### slide:: p
 # an UPDATE can also use expressions based on other columns
 
 update_stmt = user_table.update().\
-                    values(fullname = user_table.c.username + " | " + user_table.c.fullname)
+                    values(fullname=user_table.c.username +
+                            " | " + user_table.c.fullname)
 
 result = conn.execute(update_stmt)
 
-### slide:: -*-no_clear -*-
+### slide:: i
 conn.execute(select([user_table])).fetchall()
 
-### slide:: -*-no_exec -*-
+### slide:: p
 # and this is a DELETE
 
 delete_stmt = address_table.delete().\
-                where(address_table.c.email_address=="ed@ed.com")
+                where(address_table.c.email_address == "ed@ed.com")
 
 result = conn.execute(delete_stmt)
 
-### slide:: -*-no_clear -*-
+### slide:: i
 # UPDATE and DELETE have a "rowcount", number of rows matched
 # by the WHERE clause.
 result.rowcount
