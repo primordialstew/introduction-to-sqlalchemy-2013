@@ -117,8 +117,8 @@ Once a table is defined as having a primary key constraint,
 another table can be constrained such that its rows may refer
 to a row that is guaranteed to be present in this table.
 This is implemented by establishing a column or columns in the
-"remote" table whose values must match a value of the primary
-key of the "local" table.  Both sets of columns are then named as
+"remote", or child, table whose values must match a value of the primary
+key of the "local", or parent, table.  Both sets of columns are then named as
 members of a :term:`foreign key constraint`, which instructs
 the database to enforce that values in these "remote" columns are guaranteed
 to be present in the "local" table's set of primary key columns.
@@ -194,12 +194,11 @@ A typical example of denormalized data looks like::
   Wendy       Scala      Engineering
   Wendy       Java       Engineering
 
+The table's rows can be uniquely identified by the composite of the "name" and
+"language" columns, which therefore make up the table's :term:`candidate key`.
 Normalization theory would claim the above table violates "second normal form"
-because the "non prime" attribute "department" is dependent
-only on the "name" column, and not "language", which means it
-is dependent on a subset
-of the table's  :term:`candidate key`, which would necessarily be the
-composite of "name" and "language"
+because the "non prime" attribute "department" is logically dependent
+only on the "name" column, which is a subset of the candidate key.
 (Note that the author is carefully parsing the Wikipedia page for normalization
 here in order to state this correctly).   A proper normalization would use two
 tables along the lines of the following::
@@ -227,21 +226,21 @@ parse, a visual inspection of the data reveals more obviously
 how the second form is an improvement; the original version repeats
 duplicate associations between "name" and "department" many times
 according to how many distinct "language" values correspond to a name;
-whereas the second version uses distinct tables so that each "name/department"
-and "name/language" association can be expressed distinctly.
+whereas the second version uses separate tables so that each "name/department"
+and "name/language" association can be expressed independently.
 
 The concept of data constraints, particularly the primary key constraint
 and the foreign key constraint, are designed to work naturally with
-the concept of normalization.   The above schema would be applied to
-constraints by establishing "Employee Department->name" as a primary key,
+the concept of normalization.   Constraints would be applied to the above
+schema by establishing "Employee Department->name" as a primary key,
 establishing "Employee Language->name, language" as a composite primary key,
 and then creating a foreign key such that "Employee Language->name" must
 refer to "Employee Department->name".  When a schema resists being
 organized into simple primary and foreign key relationships, that's often
 a sign that it isn't strongly normalized.
 
-The Wikipedia page on normalization is a great place to learn more about
-normalization, at http://en.wikipedia.org/wiki/Database_normalization.
+The `Wikipedia page on normalization <http://en.wikipedia.org/wiki/Database_normalization>`_
+is a great place to learn more.
 
 
 .. _dml:
@@ -306,7 +305,7 @@ into each row.
   these keys, we'll generally refer to the style above where the integer primary key
   can be omitted from an INSERT.   When using SQLAlchemy, one of the most fundamental
   features it provides is a consistent and transparent system
-  of utilizing the wide variety of usage key generation and retrieval schemes.
+  of utilizing the wide variety of key generation and retrieval schemes.
 
 
 Updates
@@ -314,7 +313,7 @@ Updates
 
 The ``UPDATE`` statement changes the contents of an existing row, using a ``WHERE`` clause
 to identify those rows which are the target of the update, and a ``SET`` clause which
-identifies those columns which should be modified, as well to what value:
+identifies those columns which should be modified and to what values:
 
 .. sourcecode:: sql
 
@@ -323,7 +322,7 @@ identifies those columns which should be modified, as well to what value:
 When an UPDATE statement like the above one executes, it may match any number of
 rows, including none at all.  An UPDATE statement typically has a "row count"
 value associated with a particular execution, which indicates the number of
-rows that matched the WHERE criteria, and therefore represents that number
+rows that matched the WHERE criteria, and therefore represents the number
 of rows that were subject to the SET clause.
 
 Deletes
@@ -363,20 +362,20 @@ to the value ``12``:
 
 The key elements of the above ``SELECT`` statement are:
 
-1. The :term:`FROM clause` illustrates the table or tables from which we are
+1. The :term:`FROM clause` determines the table or tables from which we are
    to select rows.
 
-2. The :term:`WHERE clause` illustrates a criteria which we use to filter
-   thowse rows retrieved from the tables in the ``FROM`` clause
+2. The :term:`WHERE clause` illustrates a criterion which we use to filter
+   those rows retrieved from the tables in the ``FROM`` clause
 
-3. The :term:`columns clause` is indicated by the list of expressions
-   following the ``SELECT`` keyword and preceding the ``FROM`` keyword, and indicates
+3. The :term:`columns clause` is the list of expressions following the ``SELECT``
+   keyword and preceding the ``FROM`` keyword, and indicates
    those values which we'd like to display given each row that we've
    selected.
 
 With the above rules, our statement might return to us a series of rows
-that look like this, if the ``emp_name`` columns ``wally``, ``dilbert``,
-and ``wendy`` were those who were all linked to ``dep_id=12``::
+that look like this, if the ``emp_name`` column values ``wally``, ``dilbert``,
+and ``wendy`` were all those linked to ``dep_id=12``::
 
         emp_id    emp_name
         -------+------------
@@ -412,7 +411,7 @@ A ``SELECT`` statement can use a :term:`join` to produce rows from two tables at
 once, usually joining along foreign key references.    The ``JOIN`` keyword
 is used in between two table names inside the ``FROM`` clause of a ``SELECT``
 statement.   The ``JOIN`` also usually includes an ``ON`` clause, which
-specifies a criteria by which the rows from both tables are correlated
+specifies criteria by which the rows from both tables are correlated
 to each other.
 
 The figure below illustrates the behavior of a join, by indicating in the
@@ -450,7 +449,7 @@ Left Outer Join
 
 A variant of the join is the :term:`left outer join`.  This structure allows
 rows to be returned from the table on the "left" side which don't have any
-corresponding row on the "right" side.   Such as, if we wanted to select
+corresponding rows on the "right" side.   For instance, if we wanted to select
 departments and their employees, but we also wanted to see the names of departments
 that had no employees, we might use a ``LEFT OUTER JOIN``:
 
@@ -485,7 +484,7 @@ Aggregates
 An :term:`aggregate` is a function that produces a single value, given
 many values as input.   A commonly used aggregate function is the ``count()``
 function which, given a series of rows as input, returns the count of those
-rows as a single value.  The ``count()`` function accepts as an argument any
+rows as an integral value.  The ``count()`` function accepts as an argument any
 SQL expression, which we often pass as the wildcard string ``*`` that essentially
 means "all columns" - unlike most aggregate functions, ``count()`` doesn't
 evaluate the meaning its argument, it only counts how many times it is called:
@@ -520,14 +519,13 @@ takes into account rows from ``department`` as well.
 Grouping
 --------
 
-The ``GROUP BY`` keyword is applied to a ``SELECT`` statement, and
-breaks up the rows selected by a ``SELECT`` statement into smaller sets
-based on some criteria.   ``GROUP BY`` is commonly used in conjunction with
-aggregates, as it can apply individual subsets of rows to the aggregate
-function, returning an aggregated return value for each group.  The figure below
-illustrates the rows from a table being broken into three sub-groups, based on the
-expression "a", and then the ``SUM()`` aggregate function applied to the value of
-"b" for each group:
+The ``GROUP BY`` keyword is applied to a ``SELECT`` statement, breaking
+up the rows it selects into smaller sets based on some criteria.   ``GROUP BY``
+is commonly used in conjunction with aggregates, as it can apply individual
+subsets of rows to the aggregate function, yielding an aggregated return value
+for each group.  The figure below illustrates the rows from a table being broken
+into three sub-groups, based on the expression "a", and then the ``SUM()``
+aggregate function applied to the value of "b" for each group:
 
 .. image:: review_grouping.png
 
@@ -549,8 +547,8 @@ The above statement might give us output such as::
 
 Having
 ------
-The aggregated values yielded by each aggregate function, after we've grouped
-things with ``GROUP BY``, can be filtered using the ``HAVING`` keyword.
+After we've grouped things with ``GROUP BY`` and gotten aggregated values
+by applying aggregate functions, we can be filter those results using the ``HAVING`` keyword.
 We can take the above result set and return only those
 rows where more than seven employees are present:
 
@@ -569,8 +567,8 @@ SELECT Process Summary
 ----------------------
 
 It's very helpful (at least the author thinks so) to keep straight exactly
-how ``SELECT`` goes about its work, when given a combination of clauses
-such as ``WHERE``, ``ORDER BY``, ``GROUP BY``, ``HAVING``, and aggregation.
+how ``SELECT`` goes about its work when given a combination of aggregation and 
+clauses (such as ``WHERE``, ``ORDER BY``, ``GROUP BY``, ``HAVING``).
 
 Given a series of rows::
 
@@ -596,7 +594,7 @@ We'll analyze what a ``SELECT`` statement like the following does in a logical s
         ORDER BY emp_count, dep_id
 
 1. the ``FROM`` clause is operated upon first.  The table or tables which the statement is to
-   retrieve rows from is resolved; in this case, we start with the set of all rows
+   retrieve rows from are resolved; in this case, we start with the set of all rows
    contained in the ``employee`` table:
 
     .. sourcecode:: sql
@@ -631,10 +629,10 @@ We'll analyze what a ``SELECT`` statement like the following does in a logical s
               6    |   dogbert  |     4
               7    |   boss     |     3
 
-3. With the target set of rows assembled, ``GROUP BY`` then organizes the rows into groups,
-   based on the criterion given.  Here we illustrate an "intermediary" result set which
-   we would not actually see as a result, but instead indicates the
-   data that's to be passed on to the next step:
+3. With the target set of rows assembled, ``GROUP BY`` then organizes the rows into groups
+   based on the criterion given.  The "intermediary" results of this grouping will be passed
+   on to the next step behind the scenes.  Were we able to look into the pipeline, we'd see
+   something like this:
 
     .. sourcecode:: sql
 
@@ -677,7 +675,7 @@ We'll analyze what a ``SELECT`` statement like the following does in a logical s
 
 5. Almost through all of our keywords, ``HAVING`` takes effect once we have the aggregations,
    and acts like a ``WHERE`` clause for aggregate values.   In our statement, it filters
-   out groups that don't have more than one member:
+   out groups that have one or fewer members:
 
     .. sourcecode:: sql
 
@@ -690,7 +688,7 @@ We'll analyze what a ``SELECT`` statement like the following does in a logical s
                  2      |    3
 
 
-6. Finally, ``ORDER BY`` is applied last.   It's important to remember in SQL that
+6. Finally, ``ORDER BY`` is applied.   It's important to remember in SQL that
    relational algebra is a language of *sets*, which are inherently un-ordered.
    In the typical case, all of the work of selecting, aggregating, and filtering
    our data are done before any ordering is applied, and only right before
@@ -712,8 +710,8 @@ ACID Model
 ==========
 
 The flip side to the relational model employed by relational databases is the
-so called :term:`transactional` model most of them provide.   The term :term:`ACID` is an
-acronym that refers to the principal properties of relational database transactions
+so called :term:`transactional` model most of them provide.   The acronym :term:`ACID` 
+refers to the principal properties of relational database transactions
 (as well as transactions for any kind of hypothetical database).
 
 .. _atomicity:
@@ -723,7 +721,7 @@ Atomicity
 
 :term:`Atomicity` allows multiple statements to proceed within a particular demarcation known
 as a :term:`transaction`, which has a single point of completion known as a :term:`commit`.
-A transation is committed once all the operations within it have completed successfully.
+A transaction is committed once all the operations within it have completed successfully.
 If any of the operations fail, the transaction can instead be reverted using a :term:`rollback`,
 which reverses all the steps that have proceeded within the transaction, leaving the state
 of the database unchanged relative to before the transaction began.  Atomicity refers
@@ -735,16 +733,16 @@ some of the steps to succeed without all of them succeeding.
 Consistency
 -----------
 
-:term:`Consistency` encompasses the ability of the database to ensure that the
-database always remain in a valid state after a transaction completes successfully.
+:term:`Consistency` encompasses the ability of the database to ensure that it
+always remains in a valid state after a transaction completes successfully.
 Key elements used to provide consistency are :term:`constraints`, :term:`cascades`,
 and :term:`triggers`.
 
-Data constraints are the most common system used to define consistency, which
-establish rules that are checked against changes in data as those data changes
+Data constraints, the most common system used to define consistency,
+establish rules that are checked against changes in data as those changes
 are invoked against the database. Typical constraints include:
 
-    * NOT NULL constraint - value in a column may never be NULL, or non-present.
+    * NOT NULL constraint - value in a column may never be NULL or non-present.
 
     * :term:`primary key constraint` - each row must contain a single- or multi-column value
       that is unique across all other rows in the table, and is the single value
@@ -760,11 +758,11 @@ are invoked against the database. Typical constraints include:
       must be unique throughout the whole table, without themselves comprising
       the primary key.
 
-    * :term:`check constraint` - Any arbitrary expression can be applied to a row,
+    * :term:`check constraint` - any arbitrary expression can be applied to a row,
       which will result in that row being rejected if the expression does not
       evaluate to "true".
 
-Constraints are a sometimes misunderstood concept, that when properly used can give
+Constraints are a sometimes misunderstood concept that when properly used can give
 a developer a strong "peace of mind", knowing that even in the face of errors,
 mistakes, or omissions within applications that communicate with the database,
 the database itself will remain in a *consistent* state, rather than running the
@@ -816,7 +814,7 @@ are really into this stuff):
   the row with primary key "5" from the ``employee`` table, and in the course of
   our work a concurrent transaction updates the ``emp_name`` column from "Ed" to
   "Edward", when we re-SELECT this row, we will still see the value "Ed" - that is,
-  the value of this row remains consistent from the first time we read it on forward.
+  the value of this row remains consistent from the first time we read it forward.
   If we ourselves attempt to update the row again, we may be subject to a conflict when
   we attempt to commit the transaction.
 
@@ -824,7 +822,7 @@ are really into this stuff):
   *phantom read* - this refers to a row that we see in one SELECT statement that
   we later (or previously) do not see in a different SELECT statement, because
   a concurrent transaction has deleted or inserted that row since we last selected
-  with that criterion.
+  with a given set of criteria.
 
 * Serializable - Generally considered to be the highest level of isolation, the rough
   idea of serializable isolation is that we no longer have phantom reads -
@@ -834,7 +832,7 @@ are really into this stuff):
   from that table.
 
 The impact of using a higher level of isolation depends much on the specifics of
-the database in use.   Generally, lower levels of isolation are often
+the database in use.   Generally, lower levels of isolation are
 associated with higher performance and a reduced chance of :term:`deadlocks`.
 Historically, this is due to the fact that
 a lower level of isolation has less of a need to synchronize concurrent operations
