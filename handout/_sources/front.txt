@@ -20,7 +20,7 @@ itself with what may be review material for many.
 
 A second task that would be extremely helpful would be for students
 to install and test the slide runner environment and application; the
-:doc:`setup` section details these steps in detail, and includes
+:doc:`setup` section describes these steps in detail, and includes
 getting students familiar with Python virtual environments if not already,
 getting the latest version of SQLAlchemy installed into the local
 (non-system-wide) environment, and ensuring that the tutorial slides
@@ -30,7 +30,7 @@ slides locally on their machines as well as attempt other experiments
 and exercises within the environment.
 
 Two other sections, :doc:`glossary` and :doc:`reading`, represent more
-detailed paths for learning.  The glossary is broken into two sections,
+detailed paths for learning.  The glossary is broken into two sections:
 :ref:`glossary_relational` and :ref:`glossary_sqlalchemy`.  It's a good
 idea for students to run through the relational section here; the SQLAlchemy
 section on the other hand will be more useful after the tutorial is complete,

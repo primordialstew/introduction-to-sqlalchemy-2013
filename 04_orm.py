@@ -44,9 +44,8 @@ ed_user = User(name='ed', fullname='Edward Jones')
 # The "id" field is the primary key, which starts as None
 # if we didn't set it explicitly.
 
-print ed_user.name
-print ed_user.fullname
-print ed_user.id
+print(ed_user.name, ed_user.fullname)
+print(ed_user.id)
 
 ### slide:: p
 # The MetaData object is here too, available from the Base.
@@ -74,18 +73,8 @@ our_user = session.query(User).filter_by(name='ed').first()
 our_user
 
 ### slide::
-# the Session is now in a transaction.  Here's the Connection.
-
-session.connection()
-
-### slide:: p
-# we can use the Connection directly too.
-
-session.connection().execute("select * from user").fetchall()
-
-### slide::
 # the User object we've inserted now has a value for ".id"
-print ed_user.id
+print(ed_user.id)
 
 ### slide::
 # the Session maintains a *unique* object per identity.
@@ -148,7 +137,7 @@ session.query(User).filter(User.name.in_(['Edwardo', 'fakeuser'])).all()
 # But we're inside of a transaction.  Roll it back.
 session.rollback()
 
-### slide::
+### slide:: p
 # ed_user's name is back to normal
 ed_user.name
 
@@ -183,7 +172,7 @@ session.query(User).filter(User.name.in_(['ed', 'fakeuser'])).all()
 # The attributes on our mapped class act like Column objects, and
 # produce SQL expressions.
 
-print User.name == "ed"
+print(User.name == "ed")
 
 ### slide:: p
 # These SQL expressions are compatible with the select() object
@@ -211,33 +200,33 @@ query.all()
 # Query can also return individual columns
 
 for name, fullname in session.query(User.name, User.fullname):
-    print name, fullname
+    print(name, fullname)
 
 ### slide:: p
 # and can mix entities / columns together.
 
 for row in session.query(User, User.name):
-    print row.User, row.name
+    print(row.User, row.name)
 
 ### slide:: p
 # Array slices produce LIMIT/OFFSET, or equivalent
 
 for u in session.query(User).order_by(User.id)[1:3]:
-    print u
+    print(u)
 
 ### slide:: p
 # the WHERE clause is either by filter_by(), which is convenient
 
 for name, in session.query(User.name).\
                 filter_by(fullname='Ed Jones'):
-    print name
+    print(name)
 
 ### slide:: p
 # or filter(), which is more flexible
 
 for name, in session.query(User.name).\
                 filter(User.fullname == 'Ed Jones'):
-    print name
+    print(name)
 
 ### slide:: p
 # conjunctions can be passed to filter() as well
@@ -246,7 +235,7 @@ from sqlalchemy import or_
 
 for name, in session.query(User.name).\
                 filter(or_(User.fullname == 'Ed Jones', User.id < 5)):
-    print name
+    print(name)
 
 ### slide::
 # multiple filter() calls join by AND just like select().where()
@@ -254,7 +243,7 @@ for name, in session.query(User.name).\
 for user in session.query(User).\
                         filter(User.name == 'ed').\
                         filter(User.fullname == 'Ed Jones'):
-    print user
+    print(user)
 
 ### slide::
 # Query has some variety for returning results
@@ -287,6 +276,8 @@ query.one()
 
 query = session.query(User)
 query.one()
+
+### slide::
 
 # Exercises
 #
@@ -486,7 +477,7 @@ adalias = aliased(Address, stmt)
 
 for user, address in session.query(User, adalias).\
          join(adalias, User.addresses):
-     print user, address
+     print(user, address)
 
 ### slide::
 # Part VI. Eager loading
@@ -497,7 +488,7 @@ for user, address in session.query(User, adalias).\
 # objects and their Address collections, we see that many SQL statements are emitted
 
 for user in session.query(User):
-    print user, user.addresses
+    print(user, user.addresses)
 
 ### slide:: -*-no_exec-*-
 # To deal with this issue, we need to selectively apply *eager load*

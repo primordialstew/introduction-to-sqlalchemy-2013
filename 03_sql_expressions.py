@@ -184,7 +184,7 @@ conn.execute(select_stmt).fetchall()
 
 select_stmt = select([user_table]).\
                     order_by(user_table.c.username)
-print conn.execute(select_stmt).fetchall()
+print(conn.execute(select_stmt).fetchall())
 
 ### slide::
 # Exercises:

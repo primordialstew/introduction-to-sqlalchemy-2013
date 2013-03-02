@@ -143,8 +143,8 @@ on a new column <tt class="docutils literal"><span class="pre">emp_id</span></tt
 another table can be constrained such that its rows may refer
 to a row that is guaranteed to be present in this table.
 This is implemented by establishing a column or columns in the
-&#8220;remote&#8221; table whose values must match a value of the primary
-key of the &#8220;local&#8221; table.  Both sets of columns are then named as
+&#8220;remote&#8221;, or child, table whose values must match a value of the primary
+key of the &#8220;local&#8221;, or parent, table.  Both sets of columns are then named as
 members of a <a class="reference internal" href="glossary.html#term-foreign-key-constraint"><em class="xref std std-term">foreign key constraint</em></a>, which instructs
 the database to enforce that values in these &#8220;remote&#8221; columns are guaranteed
 to be present in the &#8220;local&#8221; table&#8217;s set of primary key columns.
@@ -208,12 +208,11 @@ Wally       Python     Engineering
 Wendy       Scala      Engineering
 Wendy       Java       Engineering</pre>
 </div>
-<p>Normalization theory would claim the above table violates &#8220;second normal form&#8221;
-because the &#8220;non prime&#8221; attribute &#8220;department&#8221; is dependent
-only on the &#8220;name&#8221; column, and not &#8220;language&#8221;, which means it
-is dependent on a subset
-of the table&#8217;s  <a class="reference internal" href="glossary.html#term-candidate-key"><em class="xref std std-term">candidate key</em></a>, which would necessarily be the
-composite of &#8220;name&#8221; and &#8220;language&#8221;
+<p>The table&#8217;s rows can be uniquely identified by the composite of the &#8220;name&#8221; and
+&#8220;language&#8221; columns, which therefore make up the table&#8217;s <a class="reference internal" href="glossary.html#term-candidate-key"><em class="xref std std-term">candidate key</em></a>.
+Normalization theory would claim the above table violates &#8220;second normal form&#8221;
+because the &#8220;non prime&#8221; attribute &#8220;department&#8221; is logically dependent
+only on the &#8220;name&#8221; column, which is a subset of the candidate key.
 (Note that the author is carefully parsing the Wikipedia page for normalization
 here in order to state this correctly).   A proper normalization would use two
 tables along the lines of the following:</p>
@@ -240,19 +239,19 @@ parse, a visual inspection of the data reveals more obviously
 how the second form is an improvement; the original version repeats
 duplicate associations between &#8220;name&#8221; and &#8220;department&#8221; many times
 according to how many distinct &#8220;language&#8221; values correspond to a name;
-whereas the second version uses distinct tables so that each &#8220;name/department&#8221;
-and &#8220;name/language&#8221; association can be expressed distinctly.</p>
+whereas the second version uses separate tables so that each &#8220;name/department&#8221;
+and &#8220;name/language&#8221; association can be expressed independently.</p>
 <p>The concept of data constraints, particularly the primary key constraint
 and the foreign key constraint, are designed to work naturally with
-the concept of normalization.   The above schema would be applied to
-constraints by establishing &#8220;Employee Department-&gt;name&#8221; as a primary key,
+the concept of normalization.   Constraints would be applied to the above
+schema by establishing &#8220;Employee Department-&gt;name&#8221; as a primary key,
 establishing &#8220;Employee Language-&gt;name, language&#8221; as a composite primary key,
 and then creating a foreign key such that &#8220;Employee Language-&gt;name&#8221; must
 refer to &#8220;Employee Department-&gt;name&#8221;.  When a schema resists being
 organized into simple primary and foreign key relationships, that&#8217;s often
 a sign that it isn&#8217;t strongly normalized.</p>
-<p>The Wikipedia page on normalization is a great place to learn more about
-normalization, at <a class="reference external" href="http://en.wikipedia.org/wiki/Database_normalization">http://en.wikipedia.org/wiki/Database_normalization</a>.</p>
+<p>The <a class="reference external" href="http://en.wikipedia.org/wiki/Database_normalization">Wikipedia page on normalization</a>
+is a great place to learn more.</p>
 </div>
 </div>
 <div class="section" id="data-manipulation-language-dml">
@@ -306,21 +305,21 @@ is to use <tt class="docutils literal"><span class="pre">RETURNING</span></tt>:<
 these keys, we&#8217;ll generally refer to the style above where the integer primary key
 can be omitted from an INSERT.   When using SQLAlchemy, one of the most fundamental
 features it provides is a consistent and transparent system
-of utilizing the wide variety of usage key generation and retrieval schemes.</p>
+of utilizing the wide variety of key generation and retrieval schemes.</p>
 </div>
 </div>
 <div class="section" id="updates">
 <h3>Updates<a class="headerlink" href="#updates" title="Permalink to this headline">¶</a></h3>
 <p>The <tt class="docutils literal"><span class="pre">UPDATE</span></tt> statement changes the contents of an existing row, using a <tt class="docutils literal"><span class="pre">WHERE</span></tt> clause
 to identify those rows which are the target of the update, and a <tt class="docutils literal"><span class="pre">SET</span></tt> clause which
-identifies those columns which should be modified, as well to what value:</p>
+identifies those columns which should be modified and to what values:</p>
 <div class="highlight-sql"><div class="highlight"><pre><span class="k">UPDATE</span> <span class="n">employee</span> <span class="k">SET</span> <span class="n">dep_id</span><span class="o">=</span><span class="mi">7</span> <span class="k">WHERE</span> <span class="n">emp_name</span><span class="o">=</span><span class="s1">&#39;dilbert&#39;</span>
 </pre></div>
 </div>
 <p>When an UPDATE statement like the above one executes, it may match any number of
 rows, including none at all.  An UPDATE statement typically has a &#8220;row count&#8221;
 value associated with a particular execution, which indicates the number of
-rows that matched the WHERE criteria, and therefore represents that number
+rows that matched the WHERE criteria, and therefore represents the number
 of rows that were subject to the SET clause.</p>
 </div>
 <div class="section" id="deletes">
@@ -350,18 +349,18 @@ to the value <tt class="docutils literal"><span class="pre">12</span></tt>:</p>
 </div>
 <p>The key elements of the above <tt class="docutils literal"><span class="pre">SELECT</span></tt> statement are:</p>
 <ol class="arabic simple">
-<li>The <a class="reference internal" href="glossary.html#term-from-clause"><em class="xref std std-term">FROM clause</em></a> illustrates the table or tables from which we are
+<li>The <a class="reference internal" href="glossary.html#term-from-clause"><em class="xref std std-term">FROM clause</em></a> determines the table or tables from which we are
 to select rows.</li>
-<li>The <a class="reference internal" href="glossary.html#term-where-clause"><em class="xref std std-term">WHERE clause</em></a> illustrates a criteria which we use to filter
-thowse rows retrieved from the tables in the <tt class="docutils literal"><span class="pre">FROM</span></tt> clause</li>
-<li>The <a class="reference internal" href="glossary.html#term-columns-clause"><em class="xref std std-term">columns clause</em></a> is indicated by the list of expressions
-following the <tt class="docutils literal"><span class="pre">SELECT</span></tt> keyword and preceding the <tt class="docutils literal"><span class="pre">FROM</span></tt> keyword, and indicates
+<li>The <a class="reference internal" href="glossary.html#term-where-clause"><em class="xref std std-term">WHERE clause</em></a> illustrates a criterion which we use to filter
+those rows retrieved from the tables in the <tt class="docutils literal"><span class="pre">FROM</span></tt> clause</li>
+<li>The <a class="reference internal" href="glossary.html#term-columns-clause"><em class="xref std std-term">columns clause</em></a> is the list of expressions following the <tt class="docutils literal"><span class="pre">SELECT</span></tt>
+keyword and preceding the <tt class="docutils literal"><span class="pre">FROM</span></tt> keyword, and indicates
 those values which we&#8217;d like to display given each row that we&#8217;ve
 selected.</li>
 </ol>
 <p>With the above rules, our statement might return to us a series of rows
-that look like this, if the <tt class="docutils literal"><span class="pre">emp_name</span></tt> columns <tt class="docutils literal"><span class="pre">wally</span></tt>, <tt class="docutils literal"><span class="pre">dilbert</span></tt>,
-and <tt class="docutils literal"><span class="pre">wendy</span></tt> were those who were all linked to <tt class="docutils literal"><span class="pre">dep_id=12</span></tt>:</p>
+that look like this, if the <tt class="docutils literal"><span class="pre">emp_name</span></tt> column values <tt class="docutils literal"><span class="pre">wally</span></tt>, <tt class="docutils literal"><span class="pre">dilbert</span></tt>,
+and <tt class="docutils literal"><span class="pre">wendy</span></tt> were all those linked to <tt class="docutils literal"><span class="pre">dep_id=12</span></tt>:</p>
 <div class="highlight-python"><pre>emp_id    emp_name
 -------+------------
   1    |   wally
@@ -391,7 +390,7 @@ records ordered by name:</p>
 once, usually joining along foreign key references.    The <tt class="docutils literal"><span class="pre">JOIN</span></tt> keyword
 is used in between two table names inside the <tt class="docutils literal"><span class="pre">FROM</span></tt> clause of a <tt class="docutils literal"><span class="pre">SELECT</span></tt>
 statement.   The <tt class="docutils literal"><span class="pre">JOIN</span></tt> also usually includes an <tt class="docutils literal"><span class="pre">ON</span></tt> clause, which
-specifies a criteria by which the rows from both tables are correlated
+specifies criteria by which the rows from both tables are correlated
 to each other.</p>
 <p>The figure below illustrates the behavior of a join, by indicating in the
 central blue box those rows which are <em>composites</em> of rows from both &#8220;table_1&#8221; and &#8220;table_2&#8221;
@@ -422,7 +421,7 @@ department name looks like:</p>
 <h3>Left Outer Join<a class="headerlink" href="#left-outer-join" title="Permalink to this headline">¶</a></h3>
 <p>A variant of the join is the <a class="reference internal" href="glossary.html#term-left-outer-join"><em class="xref std std-term">left outer join</em></a>.  This structure allows
 rows to be returned from the table on the &#8220;left&#8221; side which don&#8217;t have any
-corresponding row on the &#8220;right&#8221; side.   Such as, if we wanted to select
+corresponding rows on the &#8220;right&#8221; side.   For instance, if we wanted to select
 departments and their employees, but we also wanted to see the names of departments
 that had no employees, we might use a <tt class="docutils literal"><span class="pre">LEFT</span> <span class="pre">OUTER</span> <span class="pre">JOIN</span></tt>:</p>
 <div class="highlight-sql"><div class="highlight"><pre><span class="k">SELECT</span> <span class="n">d</span><span class="p">.</span><span class="n">dep_name</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">emp_name</span>
@@ -453,7 +452,7 @@ confuse the author!).</p>
 <p>An <em class="xref std std-term">aggregate</em> is a function that produces a single value, given
 many values as input.   A commonly used aggregate function is the <tt class="docutils literal"><span class="pre">count()</span></tt>
 function which, given a series of rows as input, returns the count of those
-rows as a single value.  The <tt class="docutils literal"><span class="pre">count()</span></tt> function accepts as an argument any
+rows as an integral value.  The <tt class="docutils literal"><span class="pre">count()</span></tt> function accepts as an argument any
 SQL expression, which we often pass as the wildcard string <tt class="docutils literal"><span class="pre">*</span></tt> that essentially
 means &#8220;all columns&#8221; - unlike most aggregate functions, <tt class="docutils literal"><span class="pre">count()</span></tt> doesn&#8217;t
 evaluate the meaning its argument, it only counts how many times it is called:</p>
@@ -483,14 +482,13 @@ takes into account rows from <tt class="docutils literal"><span class="pre">depa
 </div>
 <div class="section" id="grouping">
 <h3>Grouping<a class="headerlink" href="#grouping" title="Permalink to this headline">¶</a></h3>
-<p>The <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt> keyword is applied to a <tt class="docutils literal"><span class="pre">SELECT</span></tt> statement, and
-breaks up the rows selected by a <tt class="docutils literal"><span class="pre">SELECT</span></tt> statement into smaller sets
-based on some criteria.   <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt> is commonly used in conjunction with
-aggregates, as it can apply individual subsets of rows to the aggregate
-function, returning an aggregated return value for each group.  The figure below
-illustrates the rows from a table being broken into three sub-groups, based on the
-expression &#8220;a&#8221;, and then the <tt class="docutils literal"><span class="pre">SUM()</span></tt> aggregate function applied to the value of
-&#8220;b&#8221; for each group:</p>
+<p>The <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt> keyword is applied to a <tt class="docutils literal"><span class="pre">SELECT</span></tt> statement, breaking
+up the rows it selects into smaller sets based on some criteria.   <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt>
+is commonly used in conjunction with aggregates, as it can apply individual
+subsets of rows to the aggregate function, yielding an aggregated return value
+for each group.  The figure below illustrates the rows from a table being broken
+into three sub-groups, based on the expression &#8220;a&#8221;, and then the <tt class="docutils literal"><span class="pre">SUM()</span></tt>
+aggregate function applied to the value of &#8220;b&#8221; for each group:</p>
 <img alt="_images/review_grouping.png" src="_images/review_grouping.png" />
 <p>An example of an aggregation / <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt> combination that gives us the count of employees
 per department id:</p>
@@ -508,8 +506,8 @@ per department id:</p>
 </div>
 <div class="section" id="having">
 <h3>Having<a class="headerlink" href="#having" title="Permalink to this headline">¶</a></h3>
-<p>The aggregated values yielded by each aggregate function, after we&#8217;ve grouped
-things with <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt>, can be filtered using the <tt class="docutils literal"><span class="pre">HAVING</span></tt> keyword.
+<p>After we&#8217;ve grouped things with <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt> and gotten aggregated values
+by applying aggregate functions, we can be filter those results using the <tt class="docutils literal"><span class="pre">HAVING</span></tt> keyword.
 We can take the above result set and return only those
 rows where more than seven employees are present:</p>
 <div class="highlight-sql"><div class="highlight"><pre><span class="k">SELECT</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">as</span> <span class="n">emp_count</span> <span class="k">FROM</span> <span class="n">employee</span> <span class="k">GROUP</span> <span class="k">BY</span> <span class="n">dep_id</span> <span class="k">HAVING</span> <span class="n">emp_count</span> <span class="o">&gt;</span> <span class="mi">7</span>
@@ -525,8 +523,8 @@ rows where more than seven employees are present:</p>
 <div class="section" id="select-process-summary">
 <h3>SELECT Process Summary<a class="headerlink" href="#select-process-summary" title="Permalink to this headline">¶</a></h3>
 <p>It&#8217;s very helpful (at least the author thinks so) to keep straight exactly
-how <tt class="docutils literal"><span class="pre">SELECT</span></tt> goes about its work, when given a combination of clauses
-such as <tt class="docutils literal"><span class="pre">WHERE</span></tt>, <tt class="docutils literal"><span class="pre">ORDER</span> <span class="pre">BY</span></tt>, <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt>, <tt class="docutils literal"><span class="pre">HAVING</span></tt>, and aggregation.</p>
+how <tt class="docutils literal"><span class="pre">SELECT</span></tt> goes about its work when given a combination of aggregation and
+clauses (such as <tt class="docutils literal"><span class="pre">WHERE</span></tt>, <tt class="docutils literal"><span class="pre">ORDER</span> <span class="pre">BY</span></tt>, <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt>, <tt class="docutils literal"><span class="pre">HAVING</span></tt>).</p>
 <p>Given a series of rows:</p>
 <div class="highlight-python"><pre>emp_id    emp_name     dep_id
 -------+------------+----------
@@ -549,7 +547,7 @@ such as <tt class="docutils literal"><span class="pre">WHERE</span></tt>, <tt cl
 </div>
 <ol class="arabic">
 <li><p class="first">the <tt class="docutils literal"><span class="pre">FROM</span></tt> clause is operated upon first.  The table or tables which the statement is to
-retrieve rows from is resolved; in this case, we start with the set of all rows
+retrieve rows from are resolved; in this case, we start with the set of all rows
 contained in the <tt class="docutils literal"><span class="pre">employee</span></tt> table:</p>
 <blockquote>
 <div><div class="highlight-sql"><div class="highlight"><pre><span class="p">...</span> <span class="k">FROM</span> <span class="n">employee</span> <span class="p">...</span>
@@ -586,10 +584,10 @@ from the <tt class="docutils literal"><span class="pre">employee</span></tt> tab
 </div>
 </div></blockquote>
 </li>
-<li><p class="first">With the target set of rows assembled, <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt> then organizes the rows into groups,
-based on the criterion given.  Here we illustrate an &#8220;intermediary&#8221; result set which
-we would not actually see as a result, but instead indicates the
-data that&#8217;s to be passed on to the next step:</p>
+<li><p class="first">With the target set of rows assembled, <tt class="docutils literal"><span class="pre">GROUP</span> <span class="pre">BY</span></tt> then organizes the rows into groups
+based on the criterion given.  The &#8220;intermediary&#8221; results of this grouping will be passed
+on to the next step behind the scenes.  Were we able to look into the pipeline, we&#8217;d see
+something like this:</p>
 <blockquote>
 <div><div class="highlight-sql"><div class="highlight"><pre><span class="p">...</span> <span class="k">GROUP</span> <span class="k">BY</span> <span class="n">dep_id</span> <span class="p">...</span>
 
@@ -634,7 +632,7 @@ column expression here.  Below, we observe that the &#8220;emp_id&#8221; and
 </li>
 <li><p class="first">Almost through all of our keywords, <tt class="docutils literal"><span class="pre">HAVING</span></tt> takes effect once we have the aggregations,
 and acts like a <tt class="docutils literal"><span class="pre">WHERE</span></tt> clause for aggregate values.   In our statement, it filters
-out groups that don&#8217;t have more than one member:</p>
+out groups that have one or fewer members:</p>
 <blockquote>
 <div><div class="highlight-sql"><div class="highlight"><pre><span class="p">...</span> <span class="k">HAVING</span> <span class="n">emp_count</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">...</span>
 
@@ -647,7 +645,7 @@ out groups that don&#8217;t have more than one member:</p>
 </div>
 </div></blockquote>
 </li>
-<li><p class="first">Finally, <tt class="docutils literal"><span class="pre">ORDER</span> <span class="pre">BY</span></tt> is applied last.   It&#8217;s important to remember in SQL that
+<li><p class="first">Finally, <tt class="docutils literal"><span class="pre">ORDER</span> <span class="pre">BY</span></tt> is applied.   It&#8217;s important to remember in SQL that
 relational algebra is a language of <em>sets</em>, which are inherently un-ordered.
 In the typical case, all of the work of selecting, aggregating, and filtering
 our data are done before any ordering is applied, and only right before
@@ -670,14 +668,14 @@ the final results are returned to us are they ordered:</p>
 <div class="section" id="acid-model">
 <span id="id4"></span><h2>ACID Model<a class="headerlink" href="#acid-model" title="Permalink to this headline">¶</a></h2>
 <p>The flip side to the relational model employed by relational databases is the
-so called <a class="reference internal" href="glossary.html#term-transactional"><em class="xref std std-term">transactional</em></a> model most of them provide.   The term <a class="reference internal" href="glossary.html#term-acid"><em class="xref std std-term">ACID</em></a> is an
-acronym that refers to the principal properties of relational database transactions
+so called <a class="reference internal" href="glossary.html#term-transactional"><em class="xref std std-term">transactional</em></a> model most of them provide.   The acronym <a class="reference internal" href="glossary.html#term-acid"><em class="xref std std-term">ACID</em></a>
+refers to the principal properties of relational database transactions
 (as well as transactions for any kind of hypothetical database).</p>
 <div class="section" id="atomicity">
 <span id="id5"></span><h3>Atomicity<a class="headerlink" href="#atomicity" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference internal" href="glossary.html#term-atomicity"><em class="xref std std-term">Atomicity</em></a> allows multiple statements to proceed within a particular demarcation known
 as a <a class="reference internal" href="glossary.html#term-transaction"><em class="xref std std-term">transaction</em></a>, which has a single point of completion known as a <a class="reference internal" href="glossary.html#term-commit"><em class="xref std std-term">commit</em></a>.
-A transation is committed once all the operations within it have completed successfully.
+A transaction is committed once all the operations within it have completed successfully.
 If any of the operations fail, the transaction can instead be reverted using a <a class="reference internal" href="glossary.html#term-rollback"><em class="xref std std-term">rollback</em></a>,
 which reverses all the steps that have proceeded within the transaction, leaving the state
 of the database unchanged relative to before the transaction began.  Atomicity refers
@@ -686,16 +684,16 @@ some of the steps to succeed without all of them succeeding.</p>
 </div>
 <div class="section" id="consistency">
 <span id="id6"></span><h3>Consistency<a class="headerlink" href="#consistency" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference internal" href="glossary.html#term-consistency"><em class="xref std std-term">Consistency</em></a> encompasses the ability of the database to ensure that the
-database always remain in a valid state after a transaction completes successfully.
+<p><a class="reference internal" href="glossary.html#term-consistency"><em class="xref std std-term">Consistency</em></a> encompasses the ability of the database to ensure that it
+always remains in a valid state after a transaction completes successfully.
 Key elements used to provide consistency are <a class="reference internal" href="glossary.html#term-constraints"><em class="xref std std-term">constraints</em></a>, <em class="xref std std-term">cascades</em>,
 and <em class="xref std std-term">triggers</em>.</p>
-<p>Data constraints are the most common system used to define consistency, which
-establish rules that are checked against changes in data as those data changes
+<p>Data constraints, the most common system used to define consistency,
+establish rules that are checked against changes in data as those changes
 are invoked against the database. Typical constraints include:</p>
 <blockquote>
 <div><ul class="simple">
-<li>NOT NULL constraint - value in a column may never be NULL, or non-present.</li>
+<li>NOT NULL constraint - value in a column may never be NULL or non-present.</li>
 <li><a class="reference internal" href="glossary.html#term-primary-key-constraint"><em class="xref std std-term">primary key constraint</em></a> - each row must contain a single- or multi-column value
 that is unique across all other rows in the table, and is the single value
 that logically identifies the information stored in that row.</li>
@@ -707,12 +705,12 @@ flat tables can be composed together to form more intricate geometries.</li>
 constraint identifies any arbitrary column or set of columns that also
 must be unique throughout the whole table, without themselves comprising
 the primary key.</li>
-<li><a class="reference internal" href="glossary.html#term-check-constraint"><em class="xref std std-term">check constraint</em></a> - Any arbitrary expression can be applied to a row,
+<li><a class="reference internal" href="glossary.html#term-check-constraint"><em class="xref std std-term">check constraint</em></a> - any arbitrary expression can be applied to a row,
 which will result in that row being rejected if the expression does not
 evaluate to &#8220;true&#8221;.</li>
 </ul>
 </div></blockquote>
-<p>Constraints are a sometimes misunderstood concept, that when properly used can give
+<p>Constraints are a sometimes misunderstood concept that when properly used can give
 a developer a strong &#8220;peace of mind&#8221;, knowing that even in the face of errors,
 mistakes, or omissions within applications that communicate with the database,
 the database itself will remain in a <em>consistent</em> state, rather than running the
@@ -760,14 +758,14 @@ consistent from that point on, relative to our transaction.  That is, if we read
 the row with primary key &#8220;5&#8221; from the <tt class="docutils literal"><span class="pre">employee</span></tt> table, and in the course of
 our work a concurrent transaction updates the <tt class="docutils literal"><span class="pre">emp_name</span></tt> column from &#8220;Ed&#8221; to
 &#8220;Edward&#8221;, when we re-SELECT this row, we will still see the value &#8220;Ed&#8221; - that is,
-the value of this row remains consistent from the first time we read it on forward.
+the value of this row remains consistent from the first time we read it forward.
 If we ourselves attempt to update the row again, we may be subject to a conflict when
 we attempt to commit the transaction.</p>
 <p>Within repeatable read, we are still subject to the concept of a so-called
 <em>phantom read</em> - this refers to a row that we see in one SELECT statement that
 we later (or previously) do not see in a different SELECT statement, because
 a concurrent transaction has deleted or inserted that row since we last selected
-with that criterion.</p>
+with a given set of criteria.</p>
 </li>
 <li><p class="first">Serializable - Generally considered to be the highest level of isolation, the rough
 idea of serializable isolation is that we no longer have phantom reads -
@@ -778,7 +776,7 @@ from that table.</p>
 </li>
 </ul>
 <p>The impact of using a higher level of isolation depends much on the specifics of
-the database in use.   Generally, lower levels of isolation are often
+the database in use.   Generally, lower levels of isolation are
 associated with higher performance and a reduced chance of <em class="xref std std-term">deadlocks</em>.
 Historically, this is due to the fact that
 a lower level of isolation has less of a need to synchronize concurrent operations
