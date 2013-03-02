@@ -452,7 +452,7 @@ session.query(User).\
         filter(a2.email_address=='jack@hotmail.com').\
         all()
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # A major feature of Query is its great ability to build compound statements
 # using multiple SELECTs.  The subquery() method of Query combines the select()
 # and alias() Core constructs to return a new "derived table" from any Query.
@@ -465,7 +465,7 @@ subq = session.query(func.count(Address.id).label('count'), Address.user_id).\
 
 session.query(User.name, subq.c.count).join(subq, User.id==subq.c.user_id).all()
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # The subquery() feature and aliased() constructs can be combined together,
 # so that we can load entities from a subquery.  This is an example of
 # mapping an arbitrary row to a domain object.
@@ -482,7 +482,7 @@ for user, address in session.query(User, adalias).\
 ### slide::
 # Part VI. Eager loading
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # A key issue when working with object relationships in ORMs is the
 # so-called "N+1" problem.  When we iterate through a series of User
 # objects and their Address collections, we see that many SQL statements are emitted
@@ -490,7 +490,7 @@ for user, address in session.query(User, adalias).\
 for user in session.query(User):
     print(user, user.addresses)
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # To deal with this issue, we need to selectively apply *eager load*
 # directives at *query time* so that the ORM knows what relationships should
 # be loaded up front.  subqueryload() is one such directive that emits
@@ -501,9 +501,9 @@ from sqlalchemy.orm import subqueryload
 session.expire_all()
 
 for user in session.query(User).options(subqueryload(User.addresses)):
-    print user, user.addresses
+    print(user, user.addresses)
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # The subqueryload directive is complemented by the joinedload() directive,
 # which emits a JOIN in one statement.  It's particularly useful
 # for many-to-one loads.
@@ -514,9 +514,9 @@ session.expire_all()
 
 for address in session.query(Address).\
                 options(joinedload(Address.user)):
-    print address, address.user
+    print(address, address.user)
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # an important thing about joinedload() is that
 # it does not change the results of the query.
 # You can't ORDER BY the joinedload(), you use join() for that.
@@ -524,9 +524,9 @@ for address in session.query(Address).\
                 join(Address.user).\
                 filter(User.name=='jack').\
                 options(joinedload(Address.user)):
-    print address, address.user
+    print(address, address.user)
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # to join *and* eagerload at the same time without using two
 # JOIN clauses, use contains_eager.
 
@@ -536,7 +536,7 @@ for address in session.query(Address).\
                 join(Address.user).\
                 filter(User.name=='jack').\
                 options(contains_eager(Address.user)):
-    print address, address.user
+    print(address, address.user)
 
 ### slide::
 # Part VII. Cascades
@@ -574,17 +574,17 @@ class Address(Base):
     def __repr__(self):
         return "<Address(%r)>" % self.email_address
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # now, removing an Address from a user means that it gets
 # *deleted*.
-session = Session()
+session = Session(bind=engine)
 
 u1 = session.query(User).filter_by(name="jack").one()
 
 del u1.addresses[1]
 session.commit()
 
-### slide:: -*-no_exec-*-
+### slide:: p
 # deleting the User also deletes all the Address objects
 # associated with it.
 

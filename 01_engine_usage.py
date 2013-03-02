@@ -63,13 +63,13 @@ result.close()
 
 result = engine.execute("select * from employee")
 for row in result:
-    print row
+    print(row)
 
 ### slide:: p
 # the fetchall() method is a shortcut to producing a list
 # of all rows.
 result = engine.execute("select * from employee")
-print result.fetchall()
+print(result.fetchall())
 
 ### slide:: p
 # The execute() method of Engine will *autocommit*

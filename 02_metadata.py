@@ -28,7 +28,7 @@ user_table.c.name
 ### slide:: i
 # It's a bit like a Python dictionary but not totally.
 
-print user_table.c
+print(user_table.c)
 
 ### slide::
 # Column itself has information about each Column, such as
@@ -45,7 +45,7 @@ user_table.primary_key
 ### slide::
 # The Table object is at the core of the SQL expression
 # system - this is a quick preview of that.
-print user_table.select()
+print(user_table.select())
 
 ### slide:: p
 # Table and MetaData objects can be used to generate a schema
@@ -140,7 +140,7 @@ metadata2 = MetaData()
 user_reflected = Table('user', metadata2, autoload=True, autoload_with=engine)
 
 ### slide:: i
-print user_reflected.c
+print(user_reflected.c)
 
 ### slide::
 # Information about a database at a more specific level is available

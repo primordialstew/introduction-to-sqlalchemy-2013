@@ -33,6 +33,6 @@ class SADeck(Deck):
             log.setLevel(logging.INFO)
         else:
             log.setLevel(logging.WARN)
-        print "%% SQL echo is now %s" % (self._echo and 'ON' or 'OFF')
+        print("%% SQL echo is now %s" % (self._echo and 'ON' or 'OFF'))
 
 deck = SADeck
