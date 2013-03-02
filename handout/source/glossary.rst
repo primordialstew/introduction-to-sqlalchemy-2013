@@ -1332,7 +1332,7 @@ SQLAlchemy Core / Object Relational Terms
 
         Note that SQLAlchemy's built-in pooling is only one style of pooling,
         known as *application level pooling*.  An architecture can also use
-        *pool middleware*, that is, a server that runs separately and mediates
+        *pool middleware*, i.e., a server that runs separately and mediates
         connectivity between one or more applications and a database backend.
         The `PgBouncer <http://wiki.postgresql.org/wiki/PgBouncer>`_ product
         is one such middleware service designed for usage with Postgresql.
