@@ -36,7 +36,7 @@ Relational Terms
         A :term:`constraint` that uniquely defines the characteristics
         of each :term:`row`. The primary key has to consist of
         characteristics that cannot be duplicated by any other row.
-        The primary key may consist of a single attribute or a
+        The primary key may consist of a single attribute or
         multiple attributes in combination.
         (via Wikipedia)
 
@@ -59,7 +59,7 @@ Relational Terms
             http://en.wikipedia.org/wiki/Primary_Key
 
     foreign key constraint
-        A referential constraint between two tables.  A foreign key is a field in a
+        A referential constraint between two tables.  A foreign key is a field or set of fields in a
         relational table that matches a :term:`candidate key` of another table.
         The foreign key can be used to cross-reference tables.
         (via Wikipedia)
@@ -221,7 +221,7 @@ Relational Terms
 
             COMMIT
 
-        Above, the row ``employee`` rows for ``dilbert`` and ``wally``
+        Above, the ``employee`` rows for ``dilbert`` and ``wally``
         will be permanently available following the ``COMMIT`` statement.
 
     rollback
@@ -277,7 +277,7 @@ Relational Terms
 
             * To provide isolation between programs accessing a database
               concurrently. If this isolation is not provided, the
-              program's outcome are possibly erroneous.
+              programs' outcomes are possibly erroneous.
 
         (via Wikipedia)
 
@@ -353,7 +353,7 @@ Relational Terms
         "true" for a given WHERE clause.
 
         Below, we select rows from the ``email_address`` table, but use the
-        WHERE clause to limit those rows to only those which refer to email
+        WHERE clause to limit the results to only those rows which refer to email
         addresses that contain ``@gmail.com``:
 
         .. sourcecode:: sql
@@ -621,7 +621,7 @@ Relational Terms
         one row will be returned for every row in the right table, and
         columns from the left row will be filled with NULL if the ON
         criteria does not match.  In SQLAlchemy, outer joins are left
-        outer join.
+        outer joins.
 
     subquery
         A ``SELECT`` statement embedded in another ``SELECT`` statement.  Data
@@ -905,9 +905,9 @@ SQLAlchemy Core / Object Relational Terms
         Refers to an instantiated object, that is, the result of calling
         the constructor of a Python class.
 
-        We use this term to be specific that we are dealing with a stateful
-        Python object, rather than the class.  Such as if we have a class
-        called ``User`` as below::
+        We use this term to specify that we are dealing with a stateful
+        Python object, rather than the class.  Suppose we have a class
+        called ``User``::
 
             class User(object):
                 def __init__(self, name):
@@ -929,7 +929,7 @@ SQLAlchemy Core / Object Relational Terms
     instrumented
         Instrumentation refers to the process of augmenting the functionality
         and attribute set of a particular class.   Ideally, the
-        behavior of the class should remain close to a regular
+        behavior of an instrumented class should remain close to a regular
         class, except that additional behviors and features are
         made available.  The SQLAlchemy :term:`mapping` process,
         among other things, adds database-enabled :term:`descriptors`
@@ -1013,7 +1013,8 @@ SQLAlchemy Core / Object Relational Terms
 
     descriptor
     descriptors
-        In Python, a descriptor is an object attribute with “binding behavior”, one whose attribute access has been overridden by methods in the `descriptor protocol <http://docs.python.org/howto/descriptor.html>`_.
+        In Python, a descriptor is an object attribute with “binding behavior” whose
+        attribute access has been overridden by methods in the `descriptor protocol <http://docs.python.org/howto/descriptor.html>`_.
         Those methods are __get__(), __set__(), and __delete__(). If any of those methods are defined
         for an object, it is said to be a descriptor.
 
@@ -1134,7 +1135,7 @@ SQLAlchemy Core / Object Relational Terms
         SQLAlchemy's take on autocommit is that operations which involve
         executing statements using the Core :class:`~sqla:sqlalchemy.engine.Engine`
         or :class:`~sqla:sqlalchemy.engine.Connection`
-        objects are by default autocommitting, if the statement represents
+        objects are by default autocommitting if the statement represents
         one that modifies data.  If one wants to control the scope of these
         transactions explicitly, this control is readily
         available via the :meth:`~sqla:sqlalchemy.engine.Connection.begin`
@@ -1370,7 +1371,7 @@ SQLAlchemy Core / Object Relational Terms
         is an object that has a database identity (i.e. a primary key)
         and is currently associated with a session.   Any object
         that was previously :term:`pending` and has now been inserted
-        moves into the persistent state, as is any object that's
+        is in the persistent state, as is any object that's
         been loaded by the session from the database.   When a
         persistent object is removed from a session, it is known
         as :term:`detached`.
@@ -1405,7 +1406,7 @@ SQLAlchemy Core / Object Relational Terms
         explicit :term:`many to one` relationship to their parent
         object.
 
-        An example one to many schema (which note is identical
+        An example one to many schema (which, note, is identical
         to the :term:`many to one` schema):
 
         .. sourcecode:: sql
@@ -1455,7 +1456,7 @@ SQLAlchemy Core / Object Relational Terms
         explicit :term:`one to many` relationship to any number
         of parent objects that refer to them.
 
-        An example many to one schema (which note is identical
+        An example many to one schema (which, note, is identical
         to the :term:`one to many` schema):
 
         .. sourcecode:: sql
@@ -1503,7 +1504,7 @@ SQLAlchemy Core / Object Relational Terms
         in memory as changes occur to either side.   The most common
         way these two relationships are constructed is by using
         the :func:`~sqlalchemy.orm.relationship` function explicitly
-        for one side, specifying the ``backref`` keyword to it so that
+        for one side and specifying the ``backref`` keyword to it so that
         the other :func:`~sqlalchemy.orm.relationship` is created
         automatically.  We can illustrate this against the example we've
         used in :term:`one to many` as follows::
@@ -1755,7 +1756,7 @@ SQLAlchemy Core / Object Relational Terms
         with a :class:`~sqlalchemy.orm.session.Session` constructor.
 
         In reality, the sessionmaker is just slightly more elaborate
-        than a simple function, that is an expression like this::
+        than a simple function.  An expression like this::
 
             from sqlalchemy.orm import sessionmaker
             my_session = sessionmaker(bind=engine, autoflush=False)
