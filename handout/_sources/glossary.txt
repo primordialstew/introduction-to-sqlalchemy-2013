@@ -865,9 +865,9 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:engines_toplevel`
+            :ref:`sqla:engines_toplevel` - in the SQLAlchemy documentation
 
-            :ref:`sqla:connections_toplevel`
+            :ref:`sqla:connections_toplevel` - in the SQLAlchemy documentation
 
     flush
         The operation by which a :term:`session` emits INSERT, UPDATE
@@ -880,7 +880,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:session_flushing`
+            :ref:`sqla:session_flushing` - in the SQLAlchemy documentation
 
 
     identity map
@@ -892,13 +892,13 @@ SQLAlchemy Core / Object Relational Terms
         database identity are transparently coordinated onto a single
         object instance.  When using an identity map in conjunction with
         an :term:`isolated` transaction, having a reference
-        to an object that's known to have a particular primary key is
-        synonymous with referring to the corresponding row in the database
-        directly.
+        to an object that's known to have a particular primary key can
+        be considered from a practical standpoint to be a
+        proxy to the actual database row.
 
         .. seealso::
 
-            `Identity Map <http://martinfowler.com/eaaCatalog/identityMap.html>`_
+            Martin Fowler - Identity Map - http://martinfowler.com/eaaCatalog/identityMap.html
 
 
     instance
@@ -986,7 +986,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:metadata_toplevel`
+            :ref:`sqla:metadata_toplevel` - in the SQLAlchemy documentation
 
     attribute
         In Python, a field of an instance or class.   Essentially, any time
@@ -1059,7 +1059,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            `Lazy Load (on Martin Fowler) <http://martinfowler.com/eaaCatalog/lazyLoad.html>`_
+            Martin Fowler - Lazy Load - http://martinfowler.com/eaaCatalog/lazyLoad.html
 
             :term:`N plus one problem`
 
@@ -1099,7 +1099,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            `PEP 249 - Python Database API Specification v2.0 <http://www.python.org/dev/peps/pep-0249/>`_
+            PEP 249 - Python Database API Specification v2.0: http://www.python.org/dev/peps/pep-0249/
 
 
     unit of work
@@ -1111,9 +1111,9 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            `Unit of Work by Martin Fowler <http://martinfowler.com/eaaCatalog/unitOfWork.html>`_
+            Martin Fowler - Unit of Work - http://martinfowler.com/eaaCatalog/unitOfWork.html
 
-            :ref:`sqla:session_toplevel`
+            :ref:`sqla:session_toplevel` - in the SQLAlchemy documentation
 
     autocommit
         This refers to a behavior whereby individual statements are
@@ -1257,9 +1257,9 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:unitofwork_cascades`
+            :ref:`sqla:unitofwork_cascades` - in the SQLAlchemy documentation
 
-            :ref:`sqla:tutorial_delete_cascade`
+            :ref:`sqla:tutorial_delete_cascade` - in the SQLAlchemy documentation
 
 
     collection
@@ -1280,7 +1280,7 @@ SQLAlchemy Core / Object Relational Terms
         .. seealso::
 
             :ref:`sqla:collections_toplevel` - advanced collection
-            options.
+            options,  in the SQLAlchemy documentation
 
     connection
         Refers to an active database handle.  The term "connection"
@@ -1294,9 +1294,9 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:engines_toplevel`
+            :ref:`sqla:engines_toplevel` - in the SQLAlchemy documentation
 
-            :ref:`sqla:connections_toplevel`
+            :ref:`sqla:connections_toplevel` - in the SQLAlchemy documentation
 
     connection pool
         An object that maintains a series of :term:`connection` objects persistently
@@ -1350,7 +1350,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:session_object_states`
+            :ref:`sqla:session_object_states` - in the SQLAlchemy documentation
 
     pending
         This describes one of the four major object states which
@@ -1362,7 +1362,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:session_object_states`
+            :ref:`sqla:session_object_states` - in the SQLAlchemy documentation
 
     persistent
         This describes one of the four major object states which
@@ -1377,7 +1377,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:session_object_states`
+            :ref:`sqla:session_object_states` - in the SQLAlchemy documentation
 
     detached
         This describes one of the four major object states which
@@ -1393,7 +1393,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:session_object_states`
+            :ref:`sqla:session_object_states` - in the SQLAlchemy documentation
 
     one to many
         A style of :func:`~sqlalchemy.orm.relationship` which links
@@ -1709,7 +1709,7 @@ SQLAlchemy Core / Object Relational Terms
 
         .. seealso::
 
-            :ref:`sqla:relationship_config_toplevel`
+            :ref:`sqla:relationship_config_toplevel` - in the SQLAlchemy documentation
 
     scoped session
         A helper object intended to provide a *registry* of
@@ -1725,7 +1725,8 @@ SQLAlchemy Core / Object Relational Terms
             :term:`Session`
 
             :ref:`sqla:unitofwork_contextual` - an in-depth
-            introduction to the :class:`sqlalchemy.orm.scoped_session` object.
+            introduction to the :class:`sqlalchemy.orm.scoped_session` object,
+            in the SQLAlchemy documentation
 
 
     selectable

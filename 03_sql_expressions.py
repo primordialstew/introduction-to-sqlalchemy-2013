@@ -126,7 +126,7 @@ engine.execute(
 ### slide:: p
 # we can insert data using the insert() construct
 
-insert_stmt = user_table.insert().values(username='ed', fullname='ed jones')
+insert_stmt = user_table.insert().values(username='ed', fullname='Ed Jones')
 
 conn = engine.connect()
 result = conn.execute(insert_stmt)
@@ -209,19 +209,20 @@ print(conn.execute(select_stmt).fetchall())
 from sqlalchemy import ForeignKey
 
 address_table = Table("address", metadata,
-                    Column('id', Integer, primary_key=True),
-                    Column('user_id', Integer, ForeignKey('user.id'), nullable=False),
-                    Column('email_address', String(100), nullable=False)
-                )
+                        Column('id', Integer, primary_key=True),
+                        Column('user_id', Integer, ForeignKey('user.id'),
+                                                            nullable=False),
+                        Column('email_address', String(100), nullable=False)
+                      )
 metadata.create_all(engine)
 
 ### slide:: p
 # data
 conn.execute(address_table.insert(), [
-    {"user_id":1, "email_address":"ed@ed.com"},
-    {"user_id":1, "email_address":"ed@gmail.com"},
-    {"user_id":2, "email_address":"jack@yahoo.com"},
-    {"user_id":3, "email_address":"wendy@gmail.com"},
+    {"user_id": 1, "email_address": "ed@ed.com"},
+    {"user_id": 1, "email_address": "ed@gmail.com"},
+    {"user_id": 2, "email_address": "jack@yahoo.com"},
+    {"user_id": 3, "email_address": "wendy@gmail.com"},
 ])
 
 ### slide::
@@ -230,7 +231,7 @@ conn.execute(address_table.insert(), [
 # <left>.join(<right>, [<onclause>]).
 
 join_obj = user_table.join(address_table,
-                    user_table.c.id == address_table.c.user_id)
+                            user_table.c.id == address_table.c.user_id)
 print(join_obj)
 
 ### slide::
@@ -252,7 +253,7 @@ conn.execute(select_stmt).fetchall()
 select_stmt = select([user_table]).where(user_table.c.username == 'ed')
 
 print(
-    select([select_stmt.c.username]).\
+    select([select_stmt.c.username]).
         where(select_stmt.c.username == 'ed')
    )
 
@@ -261,7 +262,7 @@ print(
 
 select_alias = select_stmt.alias()
 print(
-    select([select_alias.c.username]).\
+    select([select_alias.c.username]).
         where(select_alias.c.username == 'ed')
    )
 
@@ -332,7 +333,7 @@ result = conn.execute(update_stmt)
 
 update_stmt = user_table.update().\
                     values(fullname=user_table.c.username +
-                            " | " + user_table.c.fullname)
+                            " " + user_table.c.fullname)
 
 result = conn.execute(update_stmt)
 
@@ -351,5 +352,23 @@ result = conn.execute(delete_stmt)
 # UPDATE and DELETE have a "rowcount", number of rows matched
 # by the WHERE clause.
 result.rowcount
+
+
+### slide::
+# Exercise
+#
+# 1. Execute this UPDATE - keep the "result" that's returned
+#
+#    UPDATE user SET fullname='Ed Jones' where username='ed'
+#
+# 2. how many rows did the above statement update?
+#
+# 3. Tricky bonus!  Combine update() along with select().as_scalar()
+#    to execute this UPDATE:
+#
+#    UPDATE user SET fullname=fullname ||
+#        (select email_address FROM address WHERE user_id=user.id)
+#       WHERE username IN ('jack', 'wendy')
+#
 
 ### slide::
