@@ -592,5 +592,49 @@ session.delete(u1)
 session.commit()
 
 ### slide::
+# Exercises - Final Exam !
+#
+# 1. Create a class called 'Account', which is mapped to a table
+# called 'account'.  'Account' has these columns:
+#
+#      id = Column(Integer, primary_key=True)
+#      owner = Column(String(50), nullable=False)
+#      balance = Column(Numeric, default=0)
+#
+# 2. Build a class called "Transaction" which is mapped to a table
+#    called "transaction".  "transaction" has an integer primary key
+#    and a numeric "amount" column.  It also has a column called
+#    "account_id", which has a ForeignKey() that refers to "account.id".
+#
+# 3. Add a relationship() on Transaction named "account", which refers
+#    to "Account", and has a backref called "transactions".
+#
+# 4. Create a SQLite database and generate the "account" and "transaction" tables.
+#
+# 5. Using a SQLAlchemy Session, insert this data into the
+# database:
+#
+#      a1 = Account(owner='Jack Jones', balance=5000)
+#      a2 = Account(owner='Ed Rendell', balance=10000)
+#
+# 6. Next, insert these transactions for those accounts:
+#
+#     Transaction(amount=500, account=a1)
+#     Transaction(amount=4500, account=a1)
+#     Transaction(amount=6000, account=a2)
+#     Transaction(amount=4000, account=a2)
+#
+# 7. Query for accounts with balance greater than 7000.
+#
+# 8. Query for accounts which have at least one transaction
+#    with amount less than 1000.
+#
+# 9. Produce a report that shows:
+#     * account owner
+#     * account balance
+#     * summation of transaction amounts per account (should match balance)
+#
+### slide::
+
 
 
