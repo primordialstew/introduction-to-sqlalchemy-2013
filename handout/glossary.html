@@ -152,7 +152,7 @@ In SQL, we normally denote the commit using the <tt class="docutils literal"><sp
 <span class="k">COMMIT</span>
 </pre></div>
 </div>
-<p class="last">Above, the row <tt class="docutils literal"><span class="pre">employee</span></tt> rows for <tt class="docutils literal"><span class="pre">dilbert</span></tt> and <tt class="docutils literal"><span class="pre">wally</span></tt>
+<p class="last">Above, the <tt class="docutils literal"><span class="pre">employee</span></tt> rows for <tt class="docutils literal"><span class="pre">dilbert</span></tt> and <tt class="docutils literal"><span class="pre">wally</span></tt>
 will be permanently available following the <tt class="docutils literal"><span class="pre">COMMIT</span></tt> statement.</p>
 </dd>
 <dt id="term-consistency">consistency</dt>
@@ -278,7 +278,7 @@ and can be used like any other boolean value in a WHERE clause:</p>
 a <a class="reference internal" href="#term-correlated-subquery"><em class="xref std std-term">correlated subquery</em></a>.</p>
 </dd>
 <dt id="term-foreign-key-constraint">foreign key constraint</dt>
-<dd><p class="first">A referential constraint between two tables.  A foreign key is a field in a
+<dd><p class="first">A referential constraint between two tables.  A foreign key is a field or set of fields in a
 relational table that matches a <a class="reference internal" href="#term-candidate-key"><em class="xref std std-term">candidate key</em></a> of another table.
 The foreign key can be used to cross-reference tables.
 (via Wikipedia)</p>
@@ -465,7 +465,7 @@ of the database via the defined relationships.
 <dd><p class="first">A <a class="reference internal" href="#term-constraint"><em class="xref std std-term">constraint</em></a> that uniquely defines the characteristics
 of each <a class="reference internal" href="#term-row"><em class="xref std std-term">row</em></a>. The primary key has to consist of
 characteristics that cannot be duplicated by any other row.
-The primary key may consist of a single attribute or a
+The primary key may consist of a single attribute or
 multiple attributes in combination.
 (via Wikipedia)</p>
 <p>The primary key of a table is typically, though not always,
@@ -518,7 +518,7 @@ are swapped.  At least
 one row will be returned for every row in the right table, and
 columns from the left row will be filled with NULL if the ON
 criteria does not match.  In SQLAlchemy, outer joins are left
-outer join.</dd>
+outer joins.</dd>
 <dt id="term-rollback">rollback</dt>
 <dd><p class="first">Denotes a premature end to a <a class="reference internal" href="#term-transaction"><em class="xref std std-term">transaction</em></a> which reverses
 all the effects of the transaction that have proceeded thus far; the
@@ -662,7 +662,7 @@ in cases of system failure, when execution stops
 database remain uncompleted, with unclear status.</li>
 <li>To provide isolation between programs accessing a database
 concurrently. If this isolation is not provided, the
-program&#8217;s outcome are possibly erroneous.</li>
+programs&#8217; outcomes are possibly erroneous.</li>
 </ul>
 </div></blockquote>
 <p>(via Wikipedia)</p>
@@ -713,7 +713,7 @@ to be applied to each row retrieved from the <a class="reference internal" href=
 The <tt class="docutils literal"><span class="pre">SELECT</span></tt> statement discards all rows which do not evaluate to
 &#8220;true&#8221; for a given WHERE clause.</p>
 <p>Below, we select rows from the <tt class="docutils literal"><span class="pre">email_address</span></tt> table, but use the
-WHERE clause to limit those rows to only those which refer to email
+WHERE clause to limit the results to only those rows which refer to email
 addresses that contain <tt class="docutils literal"><span class="pre">&#64;gmail.com</span></tt>:</p>
 <div class="last highlight-sql"><div class="highlight"><pre><span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span> <span class="n">email_address</span> <span class="k">FROM</span> <span class="n">email_address</span>
 <span class="k">WHERE</span> <span class="n">email_address</span> <span class="k">LIKE</span> <span class="s1">&#39;%@gmail.com&#39;</span>
@@ -837,7 +837,7 @@ offer &#8220;autocommit&#8221; options, but these are not standard.</p>
 <p>SQLAlchemy&#8217;s take on autocommit is that operations which involve
 executing statements using the Core <a class="reference external" href="http://www.sqlalchemy.org/docs/core/connections.html#sqlalchemy.engine.Engine" title="(in SQLAlchemy v0.8)"><tt class="xref py py-class docutils literal"><span class="pre">Engine</span></tt></a>
 or <a class="reference external" href="http://www.sqlalchemy.org/docs/core/connections.html#sqlalchemy.engine.Connection" title="(in SQLAlchemy v0.8)"><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></a>
-objects are by default autocommitting, if the statement represents
+objects are by default autocommitting if the statement represents
 one that modifies data.  If one wants to control the scope of these
 transactions explicitly, this control is readily
 available via the <a class="reference external" href="http://www.sqlalchemy.org/docs/core/connections.html#sqlalchemy.engine.Connection.begin" title="(in SQLAlchemy v0.8)"><tt class="xref py py-meth docutils literal"><span class="pre">begin()</span></tt></a>
@@ -867,7 +867,7 @@ mutually associated with each other, such that they coordinate
 in memory as changes occur to either side.   The most common
 way these two relationships are constructed is by using
 the <a class="reference external" href="http://www.sqlalchemy.org/docs/orm/relationships.html#sqlalchemy.orm.relationship" title="(in SQLAlchemy v0.8)"><tt class="xref py py-func docutils literal"><span class="pre">relationship()</span></tt></a> function explicitly
-for one side, specifying the <tt class="docutils literal"><span class="pre">backref</span></tt> keyword to it so that
+for one side and specifying the <tt class="docutils literal"><span class="pre">backref</span></tt> keyword to it so that
 the other <a class="reference external" href="http://www.sqlalchemy.org/docs/orm/relationships.html#sqlalchemy.orm.relationship" title="(in SQLAlchemy v0.8)"><tt class="xref py py-func docutils literal"><span class="pre">relationship()</span></tt></a> is created
 automatically.  We can illustrate this against the example we&#8217;ve
 used in <a class="reference internal" href="#term-one-to-many"><em class="xref std std-term">one to many</em></a> as follows:</p>
@@ -1053,7 +1053,7 @@ which has the same interface as a pool but doesn&#8217;t actually maintain
 connections persistently.</p>
 <p>Note that SQLAlchemy&#8217;s built-in pooling is only one style of pooling,
 known as <em>application level pooling</em>.  An architecture can also use
-<em>pool middleware</em>, that is, a server that runs separately and mediates
+<em>pool middleware</em>, i.e., a server that runs separately and mediates
 connectivity between one or more applications and a database backend.
 The <a class="reference external" href="http://wiki.postgresql.org/wiki/PgBouncer">PgBouncer</a> product
 is one such middleware service designed for usage with Postgresql.</p>
@@ -1105,7 +1105,8 @@ abstract classes, and mixins.</p>
 </div>
 </dd>
 <dt id="term-descriptor"><span id="term-descriptors"></span>descriptor<br />descriptors</dt>
-<dd><p class="first">In Python, a descriptor is an object attribute with “binding behavior”, one whose attribute access has been overridden by methods in the <a class="reference external" href="http://docs.python.org/howto/descriptor.html">descriptor protocol</a>.
+<dd><p class="first">In Python, a descriptor is an object attribute with “binding behavior” whose
+attribute access has been overridden by methods in the <a class="reference external" href="http://docs.python.org/howto/descriptor.html">descriptor protocol</a>.
 Those methods are __get__(), __set__(), and __delete__(). If any of those methods are defined
 for an object, it is said to be a descriptor.</p>
 <p>In SQLAlchemy, descriptors are used heavily in order to provide attribute behavior
@@ -1218,9 +1219,9 @@ proxy to the actual database row.</p>
 <dt id="term-instance">instance</dt>
 <dd><p class="first">Refers to an instantiated object, that is, the result of calling
 the constructor of a Python class.</p>
-<p>We use this term to be specific that we are dealing with a stateful
-Python object, rather than the class.  Such as if we have a class
-called <tt class="docutils literal"><span class="pre">User</span></tt> as below:</p>
+<p>We use this term to specify that we are dealing with a stateful
+Python object, rather than the class.  Suppose we have a class
+called <tt class="docutils literal"><span class="pre">User</span></tt>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -1240,7 +1241,7 @@ whether we&#8217;re dealing with a class or an instance of one.</p>
 <dt id="term-instrumentation"><span id="term-instrumented"></span>instrumentation<br />instrumented</dt>
 <dd>Instrumentation refers to the process of augmenting the functionality
 and attribute set of a particular class.   Ideally, the
-behavior of the class should remain close to a regular
+behavior of an instrumented class should remain close to a regular
 class, except that additional behviors and features are
 made available.  The SQLAlchemy <a class="reference internal" href="#term-mapping"><em class="xref std std-term">mapping</em></a> process,
 among other things, adds database-enabled <a class="reference internal" href="#term-descriptors"><em class="xref std std-term">descriptors</em></a>
@@ -1345,7 +1346,7 @@ then refer to exactly zero or one related object.</p>
 <p>The related objects in turn will have an implicit or
 explicit <a class="reference internal" href="#term-one-to-many"><em class="xref std std-term">one to many</em></a> relationship to any number
 of parent objects that refer to them.</p>
-<p>An example many to one schema (which note is identical
+<p>An example many to one schema (which, note, is identical
 to the <a class="reference internal" href="#term-one-to-many"><em class="xref std std-term">one to many</em></a> schema):</p>
 <div class="highlight-sql"><div class="highlight"><pre><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">department</span> <span class="p">(</span>
     <span class="n">id</span> <span class="nb">INTEGER</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
@@ -1429,7 +1430,7 @@ then refer to zero or more unique related objects.</p>
 <p>The related objects in turn will have an implicit or
 explicit <a class="reference internal" href="#term-many-to-one"><em class="xref std std-term">many to one</em></a> relationship to their parent
 object.</p>
-<p>An example one to many schema (which note is identical
+<p>An example one to many schema (which, note, is identical
 to the <a class="reference internal" href="#term-many-to-one"><em class="xref std std-term">many to one</em></a> schema):</p>
 <div class="highlight-sql"><div class="highlight"><pre><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">department</span> <span class="p">(</span>
     <span class="n">id</span> <span class="nb">INTEGER</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
@@ -1484,7 +1485,7 @@ an object can have within a <a class="reference internal" href="#term-session"><
 is an object that has a database identity (i.e. a primary key)
 and is currently associated with a session.   Any object
 that was previously <a class="reference internal" href="#term-pending"><em class="xref std std-term">pending</em></a> and has now been inserted
-moves into the persistent state, as is any object that&#8217;s
+is in the persistent state, as is any object that&#8217;s
 been loaded by the session from the database.   When a
 persistent object is removed from a session, it is known
 as <a class="reference internal" href="#term-detached"><em class="xref std std-term">detached</em></a>.</p>
@@ -1563,7 +1564,7 @@ flushed.</p>
 construct basically allows a series of parameters to be associated
 with a <a class="reference external" href="http://www.sqlalchemy.org/docs/orm/session.html#sqlalchemy.orm.session.Session" title="(in SQLAlchemy v0.8)"><tt class="xref py py-class docutils literal"><span class="pre">Session</span></tt></a> constructor.</p>
 <p>In reality, the sessionmaker is just slightly more elaborate
-than a simple function, that is an expression like this:</p>
+than a simple function.  An expression like this:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="kn">import</span> <span class="n">sessionmaker</span>
 <span class="n">my_session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span> <span class="n">autoflush</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 </pre></div>
