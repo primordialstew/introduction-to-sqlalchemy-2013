@@ -34,7 +34,6 @@ print(user_table.c)
 # Column itself has information about each Column, such as
 # name and type
 user_table.c.name.name
-
 user_table.c.name.type
 
 ### slide:: i

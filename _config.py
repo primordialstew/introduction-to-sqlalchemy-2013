@@ -15,7 +15,7 @@ class SADeck(Deck):
 
     def start(self):
         logging_config = {'format': '[SQL]: %(message)s',
-                          'stream': getattr(self, 'stdout', sys.stdout)}
+                          'stream': self.highlight_stdout("sql")}
         logging.basicConfig(**logging_config)
 
         sys.path.insert(0, os.path.dirname(self.path))
