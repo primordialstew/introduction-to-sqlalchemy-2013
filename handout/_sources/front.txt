@@ -58,7 +58,7 @@ IRC Channel
 Presenters / Credits
 =====================
 
-`Michael Bayer <http://techspot.zzzeek.org>`_ is a NYC-based software contractor with a decade of
+Michael Bayer (http://techspot.zzzeek.org) is a NYC-based software contractor with a decade of
 experience dealing with relational databases of all shapes and sizes.
 After writing many homegrown database abstraction layers in such
 languages as C, Java and Perl, and finally after several years of
@@ -70,6 +70,7 @@ helping to make Python the universally popular programming platform it
 deserves to be.
 
 Parts of this handout, as well as the core of the "Slide Presenter"
-tool, were written by `Jason Kirtland <http://discorporate.us/jek/>`_,
-who has been a key contributor
-to the SQLAlchemy project for many years.
+tool, were written by Jason Kirtland (http://discorporate.us/jek/)
+who has been a key contributor to the SQLAlchemy project for many years.
+
+Big thanks to Ben Trofatter for help editing / proofreading this document.
