@@ -169,8 +169,8 @@ inspector.get_foreign_keys('address')
 ### title:: Exercises
 #
 # 1. Using 'metadata2', reflect the "network" table in the same way
-# we just did 'user', then display the columns (or bonus, display
-# just the column names)
+#    we just did 'user', then display the columns (or bonus, display
+#    just the column names)
 #
 # 2. Using "inspector", print a list of all table names that
 #    include a column called "story_id"
