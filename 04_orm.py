@@ -286,12 +286,12 @@ query.one()
 ### slide::
 ### title:: Exercises - ORM Querying
 # 1. Produce a Query object representing the list of "fullname" values for
-# all User objects in alphabetical order.
+#    all User objects in alphabetical order.
 #
 # 2. call .all() on the query to make sure it works!
 #
 # 3. build a second Query object from the first that also selects
-# only User rows with the name "mary" or "ed".
+#    only User rows with the name "mary" or "ed".
 #
 # 4. return only the second row of the Query from #3.
 
@@ -420,37 +420,38 @@ session.query(User).\
         all()
 
 ### slide:: p
-# We can also create subqueries.  Below is a scalar subquery,
-# using a similar method as that of select().
+# We can also join with subqueries.  subquery() returns
+# an "alias" construct for us to use.
 
 from sqlalchemy import func
 
 subq = session.query(
                 func.count(Address.id).label('count'),
-                Address.user_id).\
-                group_by(Address.user_id).\
-                as_scalar()
+                User.id.label('user_id')
+                ).\
+                join(Address.user).\
+                group_by(User.id).\
+                subquery()
 
-session.query(User.name, subq.c.count).\
-            join(subq, User.id == subq.c.user_id).all()
+session.query(User.name, func.coalesce(subq.c.count, 0)).\
+            outerjoin(subq, User.id == subq.c.user_id).all()
 
-### slide:: p
-# a subquery() can also be used in the FROM list, by combining
-# it with aliased().
-
-stmt = session.query(Address).\
-                    filter(Address.email_address == 'jack@gmail.com').\
-                    subquery()
-adalias = aliased(Address, stmt)
-
-for user, address in session.query(User, adalias).\
-                        join(adalias, User.addresses):
-    print(user, address)
+### slide::
+### title:: Exercises
+# 1. Run this SQL JOIN:
+#
+#    SELECT user.name, address.email_address FROM user
+#    JOIN address ON user.id=address.user_id WHERE
+#    address.email_address='j25@yahoo.com'
+#
+# 2. Tricky Bonus!  Select all pairs of distinct user names.
+#    Hint: "... ON user_alias1.name < user_alias2.name"
+#
 
 ### slide:: p
 ### title:: Eager Loading
 # the "N plus one" problem refers to the many SELECT statements
-# for each collection.
+# emitted when loading collections against a parent result
 
 for user in session.query(User):
     print(user, user.addresses)
@@ -467,15 +468,14 @@ for user in session.query(User).options(subqueryload(User.addresses)):
     print(user, user.addresses)
 
 ### slide:: p
-# joinedload() uses a JOIN to load parent + child in one query.
+# joinedload() uses a LEFT OUTER JOIN to load parent + child in one query.
 
 session.rollback()
 
 from sqlalchemy.orm import joinedload
 
-for address in session.query(Address).\
-                options(joinedload(Address.user)):
-    print(address, address.user)
+for user in session.query(User).options(joinedload(User.addresses)):
+    print(user, user.addresses)
 
 ### slide:: p
 # eager loading *does not* change the *result* of the Query.
@@ -488,7 +488,7 @@ for address in session.query(Address).\
     print(address, address.user)
 
 ### slide:: p
-# to join *and* eagerload at the same time without using two
+# to join() *and* joinedload() at the same time without using two
 # JOIN clauses, use contains_eager()
 
 from sqlalchemy.orm import contains_eager
@@ -532,47 +532,37 @@ session.commit()
 
 ### slide::
 ### title:: Exercises - Final Exam !
-# 1. Create a class called 'Account', which is mapped to a table
-# called 'account'.  'Account' has these columns:
+# 1. Create a class called 'Account', with table "account":
 #
 #      id = Column(Integer, primary_key=True)
 #      owner = Column(String(50), nullable=False)
 #      balance = Column(Numeric, default=0)
 #
-# 2. Build a class called "Transaction" which is mapped to a table
-#    called "transaction".  "transaction" has an integer primary key
-#    and a numeric "amount" column.  It also has a column called
-#    "account_id", which has a ForeignKey() that refers to "account.id".
+# 2. Create a class "Transaction", with table "transaction":
+#      * Integer primary key
+#      * numeric "amount" column
+#      * Integer "account_id" column with ForeignKey('account.id')
 #
 # 3. Add a relationship() on Transaction named "account", which refers
 #    to "Account", and has a backref called "transactions".
 #
-# 4. Create a SQLite database and generate the "account" and "transaction" tables.
-#
-# 5. Using a SQLAlchemy Session, insert this data into the
-# database:
+# 4. Create a database, create tables, then insert these objects:
 #
 #      a1 = Account(owner='Jack Jones', balance=5000)
 #      a2 = Account(owner='Ed Rendell', balance=10000)
+#      Transaction(amount=500, account=a1)
+#      Transaction(amount=4500, account=a1)
+#      Transaction(amount=6000, account=a2)
+#      Transaction(amount=4000, account=a2)
 #
-# 6. Next, insert these transactions for those accounts:
-#
-#     Transaction(amount=500, account=a1)
-#     Transaction(amount=4500, account=a1)
-#     Transaction(amount=6000, account=a2)
-#     Transaction(amount=4000, account=a2)
-#
-# 7. Query for accounts with balance greater than 7000.
-#
-# 8. Query for accounts which have at least one transaction
-#    with amount less than 1000.
-#
-# 9. Produce a report that shows:
+# 5. Produce a report that shows:
 #     * account owner
 #     * account balance
 #     * summation of transaction amounts per account (should match balance)
+#       A column can be summed using func.sum(Transaction.amount)
 #
-### slide::
+from sqlalchemy import Integer, String, Numeric
 
+### slide::
 
 

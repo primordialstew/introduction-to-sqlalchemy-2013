@@ -1,4 +1,5 @@
 ### slide::
+### title:: Schema and MetaData
 # The structure of a relational schema is represented in Python
 # using MetaData, Table, and other objects.
 
@@ -91,21 +92,21 @@ from sqlalchemy import Unicode, UnicodeText, DateTime
 from sqlalchemy import ForeignKeyConstraint
 
 story_table = Table('story', metadata,
-           Column('story_id', Integer, primary_key=True),
-           Column('version_id', Integer, primary_key=True),
-           Column('headline', Unicode(100), nullable=False),
-           Column('body', UnicodeText)
+               Column('story_id', Integer, primary_key=True),
+               Column('version_id', Integer, primary_key=True),
+               Column('headline', Unicode(100), nullable=False),
+               Column('body', UnicodeText)
           )
 
 published_table = Table('published', metadata,
-          Column('pub_id', Integer, primary_key=True),
-          Column('pub_timestamp', DateTime, nullable=False),
-          Column('story_id', Integer),
-          Column('version_id', Integer),
-          ForeignKeyConstraint(
-                          ['story_id', 'version_id'],
-                          ['story.story_id', 'story.version_id'])
-          )
+            Column('pub_id', Integer, primary_key=True),
+            Column('pub_timestamp', DateTime, nullable=False),
+            Column('story_id', Integer),
+            Column('version_id', Integer),
+            ForeignKeyConstraint(
+                            ['story_id', 'version_id'],
+                            ['story.story_id', 'story.version_id'])
+                )
 
 ### slide:: p
 # create_all() by default checks for tables existing already
@@ -113,11 +114,9 @@ metadata.create_all(engine)
 
 
 ### slide::
-# Exercise:
-# Write a Table construct corresponding to this CREATE TABLE
-# statement.   Then emit metadata.create_all(),
-# which will emit CREATE TABLE for this table (it will skip
-# those that already exist).
+### title:: Exercises
+# 1. Write a Table construct corresponding to this CREATE TABLE
+#    statement.
 #
 # CREATE TABLE network (
 #      network_id INTEGER PRIMARY KEY,
@@ -127,11 +126,16 @@ metadata.create_all(engine)
 #      FOREIGN KEY owner_id REFERENCES user(id)
 # )
 #
-# the necessary types are imported here:
+# 2. Then emit metadata.create_all(), which will
+# emit CREATE TABLE for this table (it will skip
+# those that already exist).
+#
+# The necessary types are imported here:
 
 from sqlalchemy import Integer, String, DateTime
 
 ### slide:: p
+### title:: Reflection
 # 'reflection' refers to loading Table objects based on
 # reading from an existing database.
 metadata2 = MetaData()
@@ -162,15 +166,14 @@ inspector.get_columns('address')
 inspector.get_foreign_keys('address')
 
 ### slide::
-# Exercise:
+### title:: Exercises
 #
 # 1. Using 'metadata2', reflect the "network" table in the same way
 # we just did 'user', then display the columns (or bonus, display
 # just the column names)
 #
 # 2. Using "inspector", print a list of all table names that
-# include a column called "story_id"
+#    include a column called "story_id"
 #
-
 
 ### slide::

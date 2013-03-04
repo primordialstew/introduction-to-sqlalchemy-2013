@@ -1,4 +1,5 @@
 ### slide::
+### title:: SQL Expression Language
 # We begin with a Table object
 from sqlalchemy import MetaData, Table, Column, String, Integer
 
@@ -37,7 +38,7 @@ str(user_table.c.username == 'ed')
 
 print(
     (user_table.c.username == 'ed') | (user_table.c.username == 'jack')
-)
+    )
 
 ### slide::
 # OR and AND are available with |, &, or or_() and and_()
@@ -110,8 +111,7 @@ engine.execute(
     )
 
 ### slide::
-# Exercises:
-#
+### title:: Exercises
 # Produce these expressions using "user_table.c.fullname",
 # "user_table.c.id", and "user_table.c.username":
 #
@@ -187,8 +187,7 @@ select_stmt = select([user_table]).\
 print(conn.execute(select_stmt).fetchall())
 
 ### slide::
-# Exercises:
-#
+### title:: Exercises
 # 1. use user_table.insert() and "r = conn.execute()" to emit this
 # statement:
 #
@@ -204,7 +203,7 @@ print(conn.execute(select_stmt).fetchall())
 #
 
 ### slide:: p
-# joins / foreign keys
+### title:: Joins / Foreign Keys
 # We create a new table to illustrate multi-table operations
 from sqlalchemy import ForeignKey
 
@@ -279,7 +278,7 @@ address_subq = select([
 print(address_subq)
 
 
-### slide::
+### slide:: i
 # we use join() to link the alias() with another select()
 
 username_plus_count = select([
@@ -294,8 +293,7 @@ username_plus_count = select([
 conn.execute(username_plus_count).fetchall()
 
 ### slide::
-# Exercise
-#
+### title:: Exercises
 # Produce this SELECT:
 #
 # SELECT fullname, email_address FROM user JOIN address
@@ -304,6 +302,7 @@ conn.execute(username_plus_count).fetchall()
 #
 
 ### slide::
+### title:: Scalar selects, updates, deletes
 # a *scalar select* returns exactly one row and one column
 
 address_sel = select([
@@ -355,8 +354,7 @@ result.rowcount
 
 
 ### slide::
-# Exercise
-#
+### title:: Exercises
 # 1. Execute this UPDATE - keep the "result" that's returned
 #
 #    UPDATE user SET fullname='Ed Jones' where username='ed'

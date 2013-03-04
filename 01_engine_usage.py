@@ -1,5 +1,4 @@
 ### slide:: s
-
 from sqlalchemy import create_engine
 import os
 
@@ -25,6 +24,7 @@ e.execute("""insert into employee(emp_name) values ('jack')""")
 e.execute("""insert into employee(emp_name) values ('fred')""")
 
 ### slide::
+### title:: Engine Basics
 # create_engine() builds a *factory* for database connections.
 
 from sqlalchemy import create_engine
@@ -36,9 +36,9 @@ engine = create_engine("sqlite:///some.db")
 # a connection for us.
 
 result = engine.execute(
-             "select emp_id, emp_name from "
-             "employee where emp_id=:emp_id",
-             emp_id=3)
+                 "select emp_id, emp_name from "
+                 "employee where emp_id=:emp_id",
+                 emp_id=3)
 
 ### slide::
 # the result object we get back features methods like fetchone(),
@@ -106,7 +106,8 @@ with engine.begin() as conn:
 
 
 ### slide::
-# Exercise: Assuming this table:
+### title:: Exercises
+# Assuming this table:
 #
 #     CREATE TABLE employee (
 #         emp_id INTEGER PRIMARY KEY,
