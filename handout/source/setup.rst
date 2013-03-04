@@ -16,7 +16,7 @@ This package contains:
 
 * Interactive Python "slide runner" application, which
   is essentially a customized `REPL <http://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop>`_
-  that can step through segments of a Python script
+  that can step through segments of a Python script.
 
 * Demonstration Python scripts which illustrate various features
   of SQLAlchemy; these scripts are formatted to work best with the

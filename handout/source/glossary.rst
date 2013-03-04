@@ -225,7 +225,7 @@ Relational Terms
         will be permanently available following the ``COMMIT`` statement.
 
     rollback
-        Denotes a premature end to a :term:`transaction` which reverses
+        Denotes the end to a :term:`transaction` which reverses
         all the effects of the transaction that have proceeded thus far; the
         state established within the transaction is discarded.   In SQL,
         this is normally denoted using the ``ROLLBACK`` statement:
@@ -456,8 +456,7 @@ Relational Terms
 
     Structured Query Language
     SQL
-        SQL (pron.: /s kju l/ "S-Q-L";[3] or Structured Query
-        Language) is a special-purpose programming language designed
+        A special-purpose programming language designed
         for managing data in relational database management systems
         (RDBMS).
 
@@ -620,8 +619,8 @@ Relational Terms
         are swapped.  At least
         one row will be returned for every row in the right table, and
         columns from the left row will be filled with NULL if the ON
-        criteria does not match.  In SQLAlchemy, outer joins are left
-        outer joins.
+        criteria does not match.  Right outer joins are not frequently
+        used.
 
     subquery
         A ``SELECT`` statement embedded in another ``SELECT`` statement.  Data

@@ -517,10 +517,10 @@ model is a relational database.
 are swapped.  At least
 one row will be returned for every row in the right table, and
 columns from the left row will be filled with NULL if the ON
-criteria does not match.  In SQLAlchemy, outer joins are left
-outer joins.</dd>
+criteria does not match.  Right outer joins are not frequently
+used.</dd>
 <dt id="term-rollback">rollback</dt>
-<dd><p class="first">Denotes a premature end to a <a class="reference internal" href="#term-transaction"><em class="xref std std-term">transaction</em></a> which reverses
+<dd><p class="first">Denotes the end to a <a class="reference internal" href="#term-transaction"><em class="xref std std-term">transaction</em></a> which reverses
 all the effects of the transaction that have proceeded thus far; the
 state established within the transaction is discarded.   In SQL,
 this is normally denoted using the <tt class="docutils literal"><span class="pre">ROLLBACK</span></tt> statement:</p>
@@ -576,8 +576,7 @@ in the <tt class="docutils literal"><span class="pre">WHERE</span></tt> clause:<
 </div>
 </dd>
 <dt id="term-structured-query-language"><span id="term-sql"></span>Structured Query Language<br />SQL</dt>
-<dd><p class="first">SQL (pron.: /s kju l/ &#8220;S-Q-L&#8221;;[3] or Structured Query
-Language) is a special-purpose programming language designed
+<dd><p class="first">A special-purpose programming language designed
 for managing data in relational database management systems
 (RDBMS).</p>
 <p>Originally based upon relational algebra and tuple relational

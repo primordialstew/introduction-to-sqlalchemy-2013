@@ -239,7 +239,7 @@ refer to "Employee Department->name".  When a schema resists being
 organized into simple primary and foreign key relationships, that's often
 a sign that it isn't strongly normalized.
 
-The `Wikipedia page on normalization <http://en.wikipedia.org/wiki/Database_normalization>`_
+The Wikipedia page on normalization (http://en.wikipedia.org/wiki/Database_normalization)
 is a great place to learn more.
 
 
@@ -567,7 +567,7 @@ SELECT Process Summary
 ----------------------
 
 It's very helpful (at least the author thinks so) to keep straight exactly
-how ``SELECT`` goes about its work when given a combination of aggregation and 
+how ``SELECT`` goes about its work when given a combination of aggregation and
 clauses (such as ``WHERE``, ``ORDER BY``, ``GROUP BY``, ``HAVING``).
 
 Given a series of rows::
@@ -710,7 +710,7 @@ ACID Model
 ==========
 
 The flip side to the relational model employed by relational databases is the
-so called :term:`transactional` model most of them provide.   The acronym :term:`ACID` 
+so called :term:`transactional` model most of them provide.   The acronym :term:`ACID`
 refers to the principal properties of relational database transactions
 (as well as transactions for any kind of hypothetical database).
 
@@ -770,8 +770,8 @@ risk of accumulating ongoing data errors that are only detected much later when
 it's too late.   This "peace of mind" allows us to write and test our applications
 more quickly and boldly than we would be able to otherwise; more quickly because
 the relational database already does lots of the integrity checking we'd otherwise
-have to write by hand, and more boldly because we can produce test code more
-quickly without as much risk of corrupting our data as if we hadn't used constraints.
+have to write by hand, and more boldly because there is much less chance
+that code errors can result in corruption of data as if we hadn't used constraints.
 
 .. _isolation:
 
