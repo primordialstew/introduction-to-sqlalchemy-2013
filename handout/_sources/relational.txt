@@ -80,8 +80,7 @@ Primary Keys
 
 A table can be created with :term:`constraints`, which place rules on
 what specific data values can be present in the table.   One of the
-the most common
-constraints is the :term:`primary key constraint`, which enforces that every
+most common constraints is the :term:`primary key constraint`, which enforces that every
 row of the table must have a uniquely identifying value, consisting of one
 or more columns, where the values can additionally not be NULL.
 A primary key that uses more than one column to produce
