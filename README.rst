@@ -5,6 +5,11 @@ Introduction to SQLAlchemy - Pycon 2013
 This package contains the student prerequisite handout as well
 as the in-class software we'll be running.
 
+Video of this Tutorial from Pycon 2013
+======================================
+
+Video of this tutorial is available at http://techspot.zzzeek.org/2013/04/04/introduction-to-sqlalchemy-pycon-2013-wrapup/.
+
 Tutorial Updates
 ================
 
