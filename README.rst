@@ -2,6 +2,8 @@
 Introduction to SQLAlchemy - Pycon 2013
 =======================================
 
+Author: Mark Bayer
+
 This package contains the student prerequisite handout as well
 as the in-class software we'll be running.
 
